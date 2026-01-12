@@ -883,7 +883,13 @@ Daily Loss: ${self._daily_loss_current:.2f}/${self.daily_loss_limit:.2f}
         """List all accounts (GET /api/v3/brokerage/accounts)."""
         try:
             resp = self._make_authenticated_request('GET', '/accounts')
-            accounts = resp.get('accounts') or resp if isinstance(resp, list) else []
+            # Handle both dict response with 'accounts' key and direct list response
+            if isinstance(resp, dict):
+                accounts = resp.get('accounts', [])
+            elif isinstance(resp, list):
+                accounts = resp
+            else:
+                accounts = []
             return accounts
         except Exception as e:
             logger.warning(f"List accounts failed: {e}")
