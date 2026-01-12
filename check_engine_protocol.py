@@ -14,9 +14,10 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Setup paths
-sys.path.insert(0, '/home/ing/RICK/MULTI_BROKER_PHOENIX')
-sys.path.insert(0, '/home/ing/RICK/MULTI_BROKER_PHOENIX/MULTI_BROKER_PHOENIX')
+# Setup paths using unified path module
+from tools.paths import setup_paths, load_env
+load_env()
+setup_paths()
 
 def check_engine_status():
     """Check status of all brokers and new protocol features."""

@@ -20,25 +20,12 @@ import sys
 from pathlib import Path
 from datetime import datetime
 
-# Load .env first
-def _load_env():
-    env_path = Path(__file__).parent.parent / 'RBOTZILLA_CORE_EXTRACT' / '.env'
-    if env_path.exists():
-        with open(env_path) as f:
-            for line in f:
-                line = line.strip()
-                if line and not line.startswith('#') and '=' in line:
-                    key, val = line.split('=', 1)
-                    if key.strip() not in os.environ:
-                        os.environ[key.strip()] = val.strip()
+# Use unified paths module
+from tools.paths import PROJECT_ROOT, load_env, setup_paths
 
-_load_env()
-
-# Add paths
-project_root = Path(__file__).parent.parent
-sys.path.insert(0, str(project_root / 'MULTI_BROKER_PHOENIX'))
-sys.path.insert(0, str(project_root / 'RBOTZILLA_CORE_EXTRACT'))
-sys.path.insert(0, str(project_root / 'hive_real'))
+# Load environment and setup paths
+load_env()
+setup_paths()
 
 
 def print_banner():
