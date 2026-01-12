@@ -1,0 +1,332 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "🤖 RBOTZILLA: Launch Menu (DEFAULT)",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "${workspaceFolder}/RBOTZILLA_LAUNCH.sh"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "problemMatcher": [],
+      "isBackground": false,
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "🚀 RICK BATTLESTATION: Launch",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "${workspaceFolder}/tools/start_battlestation.sh",
+        "--auto"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "problemMatcher": [],
+      "isBackground": false,
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      }
+    },
+    {
+      "label": "ONCE STARTED: 🧠 HIVE Launch Real Browser",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "${workspaceFolder}/tools/launch_hive_browser.sh"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "problemMatcher": [],
+      "isBackground": false
+    },
+    {
+      "label": "�🛑 RICK BATTLESTATION: Shutdown",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "${workspaceFolder}/tools/stop_battlestation.sh"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🚀 Coinbase Advanced: Start Engine",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "${workspaceFolder}/tools/start_dual_broker_live.sh"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "problemMatcher": [],
+      "isBackground": false
+    },
+    {
+      "label": "ONCE STARTED: 🛑 Stop Trading Engine",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "${workspaceFolder}/tools/stop_trading_engine.sh"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🚀 RBOTZILLA: Run Headless (choose mode)",
+      "type": "shell",
+      "command": "${workspaceFolder}/tools/py_venv.sh",
+      "args": [
+        "${workspaceFolder}/MULTI_BROKER_PHOENIX/tools/run_headless.py",
+        "--mode",
+        "${input:headlessMode}"
+      ],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "PYTHONPATH": "${workspaceFolder}"
+        }
+      },
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      }
+    },
+
+    {
+      "label": "🚀 RBOTZILLA: Start ALL Brokers + Hive (multi-asset)",
+      "type": "shell",
+      "command": "${workspaceFolder}/tools/py_venv.sh",
+      "args": [
+        "-u",
+        "${workspaceFolder}/MULTI_BROKER_PHOENIX/tools/run_headless.py",
+        "--mode",
+        "multi-asset"
+      ],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "PYTHONPATH": "${workspaceFolder}/MULTI_BROKER_PHOENIX:${workspaceFolder}",
+          "HEADLESS_MODE": "multi-asset",
+          "CANARY_MODE": "false",
+          "ENABLE_AI_HIVE": "true",
+          "USE_HIVE_VALIDATION": "true",
+          "HIVE_STRATEGY_FIRST": "true",
+          "IBKR_ENABLED": "true",
+          "FEED_SYMBOLS": "EUR_USD,GBP_USD,USD_JPY,AUD_USD,USD_CAD,NZD_USD,USD_CHF,BTC-USD,ETH-USD"
+        }
+      },
+      "problemMatcher": [],
+      "group": "build",
+      "isBackground": true
+    },
+
+    {
+      "label": "🚀 RBOTZILLA: START EVERYTHING (multi-asset + monitors)",
+      "dependsOn": [
+        "🚀 RBOTZILLA: Start ALL Brokers + Hive (multi-asset)",
+        "ONCE STARTED: 🎬 Narration Monitor (human)",
+        "ONCE STARTED: 📊 View Live Status (tail /tmp/trades.db.log)"
+      ],
+      "dependsOrder": "parallel",
+      "problemMatcher": []
+    },
+    {
+      "label": "🚀 RBOTZILLA: Start Coinbase Canary Mode",
+      "type": "shell",
+      "command": "${workspaceFolder}/tools/py_venv.sh",
+      "args": [
+        "-u",
+        "${workspaceFolder}/MULTI_BROKER_PHOENIX/tools/run_headless.py",
+        "--mode",
+        "coinbase-only"
+      ],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "dedicated"
+      },
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "PYTHONPATH": "${workspaceFolder}/MULTI_BROKER_PHOENIX:${workspaceFolder}",
+          "CANARY_MODE": "true",
+          "HEADLESS_MODE": "coinbase-only",
+          "DEFAULT_STRATEGY": "holy_grail",
+          "FEED_SYMBOLS": "BTC-USD,ETH-USD"
+        }
+      },
+      "problemMatcher": [],
+      "group": "build",
+      "isBackground": true
+    },
+    {
+      "label": "ONCE STARTED: 📊 View Live Status (tail /tmp/trades.db.log)",
+      "type": "shell",
+      "command": "${workspaceFolder}/tools/tail_trades_log.sh",
+      "args": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "dedicated"
+      },
+      "problemMatcher": [],
+      "group": "test",
+      "isBackground": true
+    },
+    {
+      "label": "ONCE STARTED: 🚨 Emergency Stop (kills run_headless.py)",
+      "type": "shell",
+      "command": "pkill",
+      "args": [
+        "-f",
+        "run_headless.py"
+      ],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "ONCE STARTED: 🔍 Check Market Sessions",
+      "type": "shell",
+      "command": "${workspaceFolder}/tools/py_venv.sh",
+      "args": [
+        "${workspaceFolder}/tools/market_session_display.py"
+      ],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+
+    {
+      "label": "ONCE STARTED: 🎬 Narration Monitor (human)",
+      "type": "shell",
+      "command": "${workspaceFolder}/tools/py_venv.sh",
+      "args": [
+        "-u",
+        "${workspaceFolder}/monitor_narration.py",
+        "--follow"
+      ],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "isBackground": true
+    }
+  ],
+  "inputs": [
+    {
+      "id": "headlessMode",
+      "type": "pickString",
+      "description": "Select headless runner mode",
+      "options": [
+        "auto",
+        "multi-asset",
+        "platform-paper",
+        "simulate",
+        "oanda-only",
+        "coinbase-only",
+        "ibkr-only"
+      ],
+      "default": "auto"
+    }
+  ]
+}

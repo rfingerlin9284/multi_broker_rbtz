@@ -1,0 +1,17 @@
+{
+  "coinbase": {
+    "enabled": true,
+    "reason": "default_on",
+    "updated_utc": ""
+  },
+  "ibkr": {
+    "enabled": true,
+    "reason": "default_on",
+    "updated_utc": ""
+  },
+  "oanda": {
+    "enabled": true,
+    "reason": "default_on",
+    "updated_utc": ""
+  }
+}

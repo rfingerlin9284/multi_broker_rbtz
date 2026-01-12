@@ -1,0 +1,15 @@
+[Unit]
+Description=Rick Phoenix headless trading service
+After=network.target
+
+[Service]
+Type=simple
+User=%U
+WorkingDirectory=%h/RICK/MULTI_BROKER_PHOENIX
+ExecStart=%h/RICK/MULTI_BROKER_PHOENIX/.venv/bin/python -c "from multi_broker_phoenix.tools.run_headless import run_headless; run_headless()"
+Restart=always
+RestartSec=5
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target

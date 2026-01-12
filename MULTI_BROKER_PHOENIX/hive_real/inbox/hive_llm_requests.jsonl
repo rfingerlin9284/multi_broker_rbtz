@@ -1,0 +1,1 @@
+{"id": "5301f27f-919e-4174-8106-785e6c7afda8", "ts": "2025-12-30T13:01:17.908254+00:00", "agent": "TestAgent", "kind": "trade_analysis", "payload": {"symbol": "GBP/USD", "direction": "BUY", "entry_price": 1.275, "timeframe": "M15", "strategy": "test", "current_price": 1.275}}

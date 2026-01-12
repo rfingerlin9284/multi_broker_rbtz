@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+changed="$(git diff --cached --name-only)"
+fail=0
+
+for f in $changed; do
+  if echo "$f" | grep -q "/older_versions/"; then
+    continue
+  fi
+
+  if echo "$f" | grep -Eq '^(multi_broker_phoenix/(foundation|risk|brokers|engines|strategies|config)/.*\.(py|json|ya?ml|md)|README\.md|requirements\.txt|pyproject\.toml)$'; then
+    if git diff --cached --name-status | awk '{print $1,$2}' | grep -q "^M $f$"; then
+      if ! echo "$changed" | grep -q "$(dirname "$f")/older_versions/"; then
+        echo "ERROR: $f modified without archiving previous version into older_versions/"
+        echo "Use: tools/version_and_lock.sh $f (and stage results)"
+        fail=1
+      fi
+    fi
+  fi
+done
+
+exit $fail

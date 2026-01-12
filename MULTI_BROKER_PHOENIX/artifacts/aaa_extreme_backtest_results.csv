@@ -1,0 +1,8 @@
+strategy,scenario,starting_balance,ending_balance,total_return_pct,trades,win_rate,max_drawdown_pct,max_leverage,zombies_killed,consecutive_wins
+fabio_aaa_full,extreme_volatility_spike,10000.0,10294.189463266064,2.941894632660642,2,100.0,0.0,1.0,12,2
+fabio_aaa_full,whipsaw_chop,10000.0,18964.835249619442,89.64835249619442,5,100.0,0.0,2.0,4,5
+fabio_aaa_full,trending_with_brutal_retracements,10000.0,10052.344496791098,0.523444967910982,1,100.0,0.0,1.0,3,1
+fabio_aaa_full,gap_fest,10000.0,10480.887067506139,4.80887067506139,4,100.0,0.0,1.5,4,4
+fabio_aaa_full,liquidity_crisis,10000.0,10000.0,0.0,0,0.0,0.0,1.0,16,0
+fabio_aaa_full,momentum_trap,10000.0,10000.0,0.0,0,0.0,0.0,1.0,7,0
+fabio_aaa_full,extreme_chaos,10000.0,11266.723823104323,12.667238231043228,3,100.0,0.0,1.5,13,3

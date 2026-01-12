@@ -1,0 +1,139 @@
+#!/usr/bin/env python3
+import json
+import logging
+import re
+from datetime import datetime
+from pathlib import Path
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s | %(message)s')
+
+PROJECT_ROOT = Path("/home/ing/RICK/MULTI_BROKER_PHOENIX")
+RESULTS_JSON = PROJECT_ROOT / "results" / "strategy_pack_results.json"
+LIVE_LOG = Path("/tmp/multi_strategy_live.log")
+HIVE_TASKS = PROJECT_ROOT / "HIVE_TASKS.md"
+
+# Regex patterns for parsing live log
+ENTRY_PATTERN = re.compile(r"ORDER PLACED.*?Symbol: (\S+).*Side: (BUY|SELL).*Price: \$?([\d.]+).*Stop: \$?([\d.]+)")
+EXIT_PATTERN = re.compile(r"position closed.*?Symbol: (\S+).*exit @ \$?([\d.]+).*P&L: ([\d.-]+)", re.IGNORECASE)
+STOP_HIT_PATTERN = re.compile(r"stop (loss|triggered).*Symbol: (\S+).*@ \$?([\d.]+)", re.IGNORECASE)
+
+
+def load_backtest_results():
+    if RESULTS_JSON.exists():
+        try:
+            with open(RESULTS_JSON) as f:
+                return json.load(f)
+        except Exception as e:
+            logging.error(f"Failed to load backtest results: {e}")
+            return {}
+    return {}
+
+
+def parse_live_trades():
+    if not LIVE_LOG.exists():
+        return {"closed_trades": 0, "stop_hits": 0, "total_slippage": 0.0, "stop_hit_count": 0}
+
+    content = LIVE_LOG.read_text()
+    lines = content.splitlines()
+
+    open_trades = {}  # symbol -> (side, entry_price, stop_price)
+    closed_stats = {"closed_trades": 0, "stop_hits": 0, "total_slippage": 0.0, "stop_hit_count": 0}
+
+    for line in lines:
+        entry_match = ENTRY_PATTERN.search(line)
+        if entry_match:
+            symbol, side, entry_price, stop_price = entry_match.groups()
+            open_trades[symbol] = (side, float(entry_price), float(stop_price))
+            continue
+
+        stop_match = STOP_HIT_PATTERN.search(line)
+        if stop_match:
+            _, symbol, exit_price = stop_match.groups()
+            exit_price = float(exit_price)
+            if symbol in open_trades:
+                _, _, intended_stop = open_trades[symbol]
+                slippage = abs(exit_price - intended_stop)
+                closed_stats["stop_hits"] += 1
+                closed_stats["total_slippage"] += slippage
+                closed_stats["stop_hit_count"] += 1
+                closed_stats["closed_trades"] += 1
+                del open_trades[symbol]
+            continue
+
+        exit_match = EXIT_PATTERN.search(line)
+        if exit_match:
+            symbol, exit_price, pnl = exit_match.groups()
+            exit_price = float(exit_price)
+            pnl = float(pnl)
+            if symbol in open_trades:
+                _, _, intended_stop = open_trades[symbol]
+                price_diff = abs(exit_price - intended_stop) / max(intended_stop, 1e-9)
+                if price_diff < 0.005 and pnl < 0:
+                    closed_stats["stop_hits"] += 1
+                    slippage = abs(exit_price - intended_stop)
+                    closed_stats["total_slippage"] += slippage
+                    closed_stats["stop_hit_count"] += 1
+                closed_stats["closed_trades"] += 1
+                del open_trades[symbol]
+            else:
+                closed_stats["closed_trades"] += 1
+
+    return closed_stats
+
+
+def audit_strategies(backtest_data, sl_stats):
+    issues = []
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
+
+    for strat, metrics in backtest_data.get("strategies", {}).items():
+        win_rate = metrics.get("win_rate", 0.0)
+        pf = metrics.get("profit_factor", 0.0)
+        dd = metrics.get("max_dd", 0.0)
+
+        if win_rate < 55.0:
+            issues.append(f"[{timestamp}] STRATEGY {strat}: Win rate {win_rate:.1f}% < 55% → review filters")
+        if pf < 1.2:
+            issues.append(f"[{timestamp}] STRATEGY {strat}: PF {pf:.2f} < 1.2 → improve risk/reward")
+        if dd > 8.0:
+            issues.append(f"[{timestamp}] STRATEGY {strat}: Max DD {dd:.1f}% > 8% → tighten risk")
+
+    closed = sl_stats["closed_trades"]
+    if closed > 0:
+        hit_rate = sl_stats["stop_hits"] / closed * 100
+        avg_slippage = sl_stats["total_slippage"] / max(sl_stats["stop_hit_count"], 1)
+
+        if hit_rate > 35.0:
+            issues.append(f"[{timestamp}] STOP LOSS: Hit rate {hit_rate:.1f}% > 35% → stops too tight (whipsaw)")
+        elif hit_rate < 15.0:
+            issues.append(f"[{timestamp}] STOP LOSS: Hit rate {hit_rate:.1f}% < 15% → stops too wide (large losses)")
+
+        if avg_slippage > 0.5:
+            issues.append(f"[{timestamp}] STOP LOSS: Avg slippage {avg_slippage:.2f}% on hits → improve execution or use limit stops")
+
+        if sl_stats["stop_hit_count"] > 0:
+            issues.append(f"[{timestamp}] STOP LOSS: {sl_stats['stop_hit_count']} stops hit, avg slippage {avg_slippage:.2f}%")
+
+    return issues
+
+
+def notify_hive(issues):
+    if not issues:
+        logging.info("Audit complete - system healthy")
+        return
+
+    logging.warning(f"{len(issues)} issues detected → notifying Hive")
+
+    with open(HIVE_TASKS, "w") as f:
+        f.write("# HIVE AUTONOMOUS TASK QUEUE\n")
+        f.write(f"# Audit: {datetime.now().strftime('%Y-%m-%d %H:%M')}\n\n")
+        f.write("**URGENT TASKS - FIX TO MAINTAIN EDGE**\n\n")
+        for issue in issues:
+            f.write(f"- {issue}\n")
+        f.write("\n**Process and clear when resolved**\n")
+
+
+if __name__ == "__main__":
+    backtest = load_backtest_results()
+    sl_stats = parse_live_trades()
+    issues = audit_strategies(backtest, sl_stats)
+    notify_hive(issues)

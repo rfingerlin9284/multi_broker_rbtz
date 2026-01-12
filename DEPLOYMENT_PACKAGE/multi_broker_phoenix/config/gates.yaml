@@ -1,0 +1,3 @@
+version: 1
+oco_required: true
+min_rr_ratio: 3.2

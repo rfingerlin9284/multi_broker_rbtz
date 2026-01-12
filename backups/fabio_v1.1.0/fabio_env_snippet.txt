@@ -1,0 +1,5 @@
+FABIO_RSI_THRESHOLD=40
+# Stop Loss Configuration (volatility-adaptive)
+FABIO_STOP_MIN_PCT=0.01      # 1% minimum stop
+FABIO_STOP_MAX_PCT=0.08      # 8% maximum stop
+FABIO_STOP_VOL_MULT=3.0      # 3x local volatility
