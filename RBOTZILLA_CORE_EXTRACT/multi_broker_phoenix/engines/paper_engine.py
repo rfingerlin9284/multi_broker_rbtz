@@ -84,16 +84,15 @@ class PaperEngine:
         # === POSITION AWARENESS & REVERSAL LOGIC ===
         allow_reversal = os.getenv('OANDA_ALLOW_REVERSAL_ON_OPPOSITE_SIGNAL', os.getenv('OANDA_ALLOW_REVERSAL', 'true')).lower() in ('1', 'true', 'yes')
         reversal_min_conf = float(os.getenv('OANDA_REVERSAL_MIN_CONFIDENCE', '0.75'))
-        conf_threshold = float(os.getenv('OANDA_SIGNAL_CONFIDENCE_THRESHOLD', '0.70'))
         symbol = getattr(candidate, 'symbol', None)
         side = getattr(candidate, 'side', None)
         confidence = getattr(candidate, 'confidence', None)
-
-        # Confidence filter
-        if confidence is not None and float(confidence) < conf_threshold:
-            logger = __import__('logging').getLogger(__name__)
-            logger.info('Skipping simulated order for %s: confidence %.3f < threshold %.3f', symbol, float(confidence), conf_threshold)
-            return {'status': 'SKIPPED', 'reason': 'low_confidence', 'confidence': confidence}
+        
+        # NOTE: Confidence filtering is done ONCE at AI Hive level, NOT here.
+        # If a signal reaches this point, it already passed AI Hive validation.
+        # Double-checking here caused signals to be approved by Hive then rejected here.
+        # The OANDA_SIGNAL_CONFIDENCE_THRESHOLD is checked in the OANDA connector for
+        # live orders only - paper engine trusts signals that reach it.
 
         conn = self._get_conn()
         cur = conn.cursor()
@@ -224,3 +223,4 @@ class PaperEngine:
         cur.execute("DELETE FROM trades")
         conn.commit()
         conn.close()
+```
