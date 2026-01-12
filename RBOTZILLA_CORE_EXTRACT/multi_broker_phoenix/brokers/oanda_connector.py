@@ -200,6 +200,9 @@ class OANDAConnector:
         Uses the centralized `execution.oanda_practice_client.OandaPracticeClient` to
         ensure the request hits the practice host and that an OCO (SL + TP) bracket
         is attached. If SL/TP are missing the order will be refused.
+        
+        TRAILING STOP MODE: When OANDA_USE_TRAILING_STOP=true, uses broker-side
+        trailing stop instead of fixed TP, which survives engine restarts.
         """
         if not self.token or not self.account_id:
             raise RuntimeError('OANDA credentials not configured')
@@ -209,6 +212,10 @@ class OANDAConnector:
         tp_price = getattr(candidate, 'take_profit', None)
         if sl_price is None or tp_price is None:
             raise RuntimeError('Orders must include stop_loss and take_profit (OCO bracket required)')
+
+        # Check if we should use OANDA's native trailing stop (DEFAULT: TRUE)
+        use_trailing = os.getenv('OANDA_USE_TRAILING_STOP', 'true').lower() in ('true', '1', 'yes')
+        trailing_pips = float(os.getenv('OANDA_TRAILING_STOP_PIPS', '20'))
 
         try:
             # Use the practice-only client (validates practice host and auth)
@@ -236,11 +243,57 @@ class OANDAConnector:
             if ('orderCreateTransaction' in res) or ('orderFillTransaction' in res):
                 res['success'] = True
                 res['execution_type'] = 'PLATFORM_PAPER'
+                
+                # If trailing stop enabled, add trailing stop order after fill
+                if use_trailing and res.get('orderFillTransaction'):
+                    try:
+                        trade_id = res['orderFillTransaction'].get('id') or res['orderFillTransaction'].get('tradeOpened', {}).get('tradeID')
+                        if trade_id:
+                            self._add_trailing_stop(trade_id, trailing_pips, instrument)
+                            logger.info(f"🎯 OANDA Trailing stop added: {trailing_pips} pips for trade {trade_id}")
+                            res['trailing_stop_added'] = True
+                            res['trailing_pips'] = trailing_pips
+                    except Exception as trail_exc:
+                        logger.warning(f"Failed to add trailing stop: {trail_exc}")
+                        
             return res
 
         except Exception as exc:
             logger.error('OANDA practice order failed: %s', exc)
             return {'success': False, 'status': 'ERROR', 'error': str(exc)}
+
+    def _add_trailing_stop(self, trade_id: str, distance_pips: float, instrument: str) -> Dict[str, Any]:
+        """Add a trailing stop to an existing trade using OANDA's native trailing stop.
+        
+        This is BROKER-SIDE - survives engine restarts!
+        """
+        # Calculate distance in price (depends on instrument)
+        if 'JPY' in instrument:
+            distance = distance_pips * 0.01  # JPY pairs
+        else:
+            distance = distance_pips * 0.0001  # Non-JPY pairs
+        
+        payload = {
+            'trailingStopLoss': {
+                'distance': f'{distance:.5f}',
+                'timeInForce': 'GTC'
+            }
+        }
+        
+        resp = self.http.put(
+            f"{self.base_url}/v3/accounts/{self.account_id}/trades/{trade_id}/orders",
+            headers=self._headers(),
+            json=payload,
+            timeout=10
+        )
+        
+        if resp.status_code in (200, 201):
+            logger.info(f"✅ Trailing stop set: trade {trade_id}, {distance_pips} pips")
+            return {'success': True, 'trade_id': trade_id, 'distance_pips': distance_pips}
+        else:
+            error = resp.json() if resp.content else resp.text
+            logger.error(f"Failed to set trailing stop: {error}")
+            return {'success': False, 'error': str(error)}
 
     def place_live_order(self, candidate: Any, units: int, confirm_real_money: bool = False) -> Dict[str, Any]:
         """Place a LIVE market order on fxTrade.
