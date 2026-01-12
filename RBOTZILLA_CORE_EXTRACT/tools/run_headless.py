@@ -616,8 +616,10 @@ def run_headless(mode: Optional[str] = None):
                             _canary_log(f"✋ {sym}/{strat_name} - No signal")
                         continue
                     
-                    # Record signal
+                    # Record signal WITH STRATEGY NAME for traceability
                     cycle_counters['signals'] += 1
+                    confidence = getattr(cand, 'confidence', 50.0)
+                    print(f"🎯 SIGNAL [{strat_name}]: {sym} {cand.side} @ ${price:.5f} (conf: {confidence:.0f}%)")
                     if canary_mode:
                         _canary_log(f"🎯 {sym} SIGNAL ({strat_name}): {cand.side} @ ${price:.2f}")
                 
