@@ -51,22 +51,22 @@ class AutonomousCharter:
     # Auto-Breakeven Rules
     AUTO_BE_ENABLED = True          # HARDCODED - Cannot disable
     AUTO_BE_R_THRESHOLD = 1.0       # 1.0R minimum to trigger breakeven
-    AUTO_BE_PIP_THRESHOLD = 20      # 20 pips minimum
-    AUTO_BE_OFFSET_PIPS = 5         # Move SL 5 pips into profit
+    AUTO_BE_PIP_THRESHOLD = 8       # 8 pips minimum (matches SL)
+    AUTO_BE_OFFSET_PIPS = 2         # Move SL 2 pips into profit
     AUTO_BE_PRIORITY = "HIGH"       # Executes before time stops
     
-    # Auto-Time Stops (6-hour charter rule)
+    # Auto-Time Stops (8-hour max hold rule)
     AUTO_TIME_STOP_ENABLED = True   # HARDCODED - Cannot disable
-    AUTO_TIME_STOP_MAJOR_HOURS = 6  # Hard exit at 6 hours (charter rule)
-    AUTO_TIME_STOP_MINOR_HOURS = 3  # Soft exit if <0.5R at 3 hours
+    AUTO_TIME_STOP_MAJOR_HOURS = 8  # Hard exit at 8 hours
+    AUTO_TIME_STOP_MINOR_HOURS = 4  # Soft exit if <0.5R at 4 hours
     AUTO_TIME_STOP_MINOR_R_THRESHOLD = 0.5  # Exit if R multiple < 0.5
     AUTO_TIME_STOP_PRIORITY = "CRITICAL"  # Enforced regardless
     
-    # Auto-Trailing Stops
+    # Auto-Trailing Stops (activates on momentum)
     AUTO_TRAIL_ENABLED = True       # HARDCODED - Cannot disable
-    AUTO_TRAIL_ACTIVATION_R = 2.0   # Activate at 2.0R profit
-    AUTO_TRAIL_DISTANCE_PIPS = 15   # Trail 15 pips from high
-    AUTO_TRAIL_STEP_PIPS = 5        # Step trail by 5 pips
+    AUTO_TRAIL_ACTIVATION_R = 1.5   # Activate at 1.5R profit (bullish trend)
+    AUTO_TRAIL_DISTANCE_PIPS = 10   # Trail 10 pips from high (tight)
+    AUTO_TRAIL_STEP_PIPS = 3        # Step trail by 3 pips
     AUTO_TRAIL_PRIORITY = "HIGH"
     
     # Auto-Giveback Detection

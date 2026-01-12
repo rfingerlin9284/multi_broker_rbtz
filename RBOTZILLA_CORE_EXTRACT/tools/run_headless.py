@@ -323,6 +323,27 @@ def run_headless(mode: Optional[str] = None):
             print(f"   ⚠️  COINBASE LIVE MODE ACTIVE - Real money trades enabled")
             print(f"   💰 Nano-lot limits: ${coin.min_trade_usd}-${coin.max_trade_usd} per trade")
             print(f"   🛡️  Daily loss limit: ${coin.daily_loss_limit}")
+            
+            # AUTO-CONVERT: Ensure we have USD trading capital
+            # If we only have crypto (like BTC), sell some to get USD for trading
+            auto_convert = os.getenv('COINBASE_AUTO_CONVERT', 'true').lower() in ('true', '1', 'yes')
+            if auto_convert:
+                print(f"   🔄 AUTO-CONVERT: Checking trading capital...")
+                for crypto_sym in ['BTC-USD', 'ETH-USD']:
+                    trade_check = coin.can_trade_symbol(crypto_sym)
+                    if not trade_check['can_buy'] and trade_check['can_sell']:
+                        # Have crypto but no USD - auto-convert some
+                        print(f"   💰 {crypto_sym}: Have ${trade_check['crypto_value_usd']:.2f} in crypto, ${trade_check['usd_available']:.2f} USD")
+                        target_usd = float(os.getenv('COINBASE_AUTO_CONVERT_TARGET_USD', '50'))
+                        if coin.auto_ensure_trading_capital(crypto_sym, target_usd):
+                            print(f"   ✅ Auto-converted to get ~${target_usd:.0f} USD trading capital")
+                        else:
+                            print(f"   ⚠️  Auto-convert skipped (will trade with existing crypto)")
+                        break  # Only convert from one asset
+                    elif trade_check['can_buy']:
+                        print(f"   ✅ Already have ${trade_check['usd_available']:.2f} USD for trading")
+                        break
+            
         if canary_mode:
             _canary_log(f"Coinbase connector initialized: {mode_label}")
     except Exception as exc:
@@ -695,92 +716,150 @@ def run_headless(mode: Optional[str] = None):
                     
                     if canary_mode:
                         _canary_log(f"✅ Risk checks PASSED - Size: {sizing['size']} units")
-                    # Choose connector based on symbol/platform and prefer platform paper when available
+                    # Choose connector based on symbol/platform - REAL API ONLY (no simulation fallback)
                     order = None
                     try:
-                        # Prefer explicit platform in candidate
-                        platform = getattr(cand, 'platform', None) or ( 'OANDA' if '_' in sym else 'COINBASE' if '-' in sym else 'IBKR' )
+                        # Determine platform from SYMBOL (ignore candidate.platform which may be wrong)
+                        # Forex pairs have underscore: EUR_USD -> OANDA
+                        # Crypto pairs have dash: BTC-USD -> COINBASE
+                        if '_' in sym:
+                            platform = 'OANDA'
+                        elif '-' in sym:
+                            platform = 'COINBASE'
+                        else:
+                            platform = 'IBKR'
                         
                         if canary_mode:
                             _canary_log(f"📝 Preparing order: {cand.side} {sym} via {platform}")
                         
                         # ============================================================
-                        # ORDER ROUTING: REAL API CONNECTIONS (NO SIMULATION)
+                        # ORDER ROUTING: REAL API CONNECTIONS ONLY
+                        # NO FALLBACK - NO SIMULATION - DIRECT TO BROKER
                         # ============================================================
                         # OANDA: place_paper_order() -> Real Practice API
-                        # IBKR: place_paper_order() -> Real TWS Paper Port 4002
-                        # COINBASE: place_live_order() if COINBASE_LIVE=true (REAL MONEY)
-                        #           place_paper_order() otherwise (simulation)
+                        # COINBASE: place_live_order() -> REAL MONEY
                         # ============================================================
                         
-                        # Mode-driven routing
-                        if chosen == 'simulate':
-                            order = engine.place_order(cand, sizing['size'], execution_type='SIMULATED')
-                            if canary_mode:
-                                _canary_log(f"✅ SIMULATED order placed: {order}")
-                        elif chosen == 'oanda-only':
+                        # FOREX pairs (EUR_USD, GBP_USD, etc.) -> OANDA Practice API
+                        if platform == 'OANDA':
                             if oanda is None:
-                                raise RuntimeError('OANDA connector not initialized')
+                                raise RuntimeError(f'OANDA connector not initialized - cannot trade {sym}')
+                            
+                            # Check if we already have an open position on this symbol (FIFO check)
+                            try:
+                                open_trades = oanda.list_open_trades() if hasattr(oanda, 'list_open_trades') else []
+                                if not open_trades:
+                                    # Fallback to API call
+                                    open_trades_resp = oanda.http.get(
+                                        f"{oanda.base_url}/v3/accounts/{oanda.account_id}/openTrades",
+                                        headers=oanda._headers(),
+                                        timeout=5
+                                    ).json().get('trades', [])
+                                    open_trades = [t.get('instrument') for t in open_trades_resp]
+                                if sym in open_trades or any(t.get('instrument') == sym for t in (open_trades if isinstance(open_trades, list) else [])):
+                                    print(f"⚠️  Skipping {sym} - already have open position (FIFO)")
+                                    continue
+                            except Exception as fifo_check_err:
+                                print(f"   FIFO check failed: {fifo_check_err}")
+                            
                             units = int(sizing['size']) if isinstance(sizing['size'], (int, float)) else int(float(sizing['size']))
+                            
+                            # Calculate SL/TP based on 3:1 R:R from .env
+                            # SL: 5-8 pips, TP: 3x SL distance
+                            sl_pips = float(os.getenv('OANDA_INITIAL_STOP_PIPS', '6'))
+                            rr_ratio = float(os.getenv('OANDA_RR_RATIO', '3.0'))
+                            tp_pips = sl_pips * rr_ratio
+                            
+                            entry = cand.entry_price
+                            pip_value = 0.01 if 'JPY' in sym else 0.0001
+                            
+                            if cand.side.upper() == 'BUY':
+                                sl_price = entry - (sl_pips * pip_value)
+                                tp_price = entry + (tp_pips * pip_value)
+                            else:  # SELL
+                                sl_price = entry + (sl_pips * pip_value)
+                                tp_price = entry - (tp_pips * pip_value)
+                            
+                            # Set SL/TP on candidate
+                            cand.stop_loss = sl_price
+                            cand.take_profit = tp_price
+                            print(f"   📊 SL: {sl_price:.5f} ({sl_pips} pips) | TP: {tp_price:.5f} ({tp_pips} pips, {rr_ratio}:1 R:R)")
+                            
                             order = oanda.place_paper_order(cand, units=units)
-                            print(f"🟡 OANDA PRACTICE ORDER: {sym} {cand.side} x{units}")
+                            print(f"🟡 OANDA PRACTICE API: {sym} {cand.side} x{units}")
                             if canary_mode:
                                 _canary_log(f"✅ OANDA PRACTICE order via API: {order}")
-                        elif chosen == 'coinbase-only':
+                        
+                        # CRYPTO pairs (BTC-USD, ETH-USD, etc.) -> Coinbase
+                        elif platform == 'COINBASE':
+                            if coin is None:
+                                raise RuntimeError(f'Coinbase connector not initialized - cannot trade {sym}')
+                            
+                            # Check what we can trade based on available balance
+                            # - BUY (LONG): needs USD balance
+                            # - SELL (SHORT): needs crypto balance (e.g., BTC)
+                            trade_check = coin.can_trade_symbol(sym, min_usd=float(os.getenv('COINBASE_MIN_TRADE_USD', '5')))
+                            side = cand.side.upper()
+                            
+                            can_execute = False
+                            adjusted_side = side
+                            
+                            if side in ('BUY', 'LONG'):
+                                if trade_check['can_buy']:
+                                    can_execute = True
+                                    print(f"   💵 Using ${trade_check['usd_available']:.2f} USD to BUY")
+                                elif trade_check['can_sell']:
+                                    # No USD but have crypto - can't buy, skip or suggest sell
+                                    print(f"   ⚠️  No USD to BUY, but have ${trade_check['crypto_value_usd']:.2f} in {sym.split('-')[0]}")
+                                    print(f"   💡 Waiting for SELL signal to convert to USD first")
+                                    continue
+                                else:
+                                    print(f"   ❌ Insufficient balance for {sym} - need USD for BUY")
+                                    continue
+                            else:  # SELL/SHORT
+                                if trade_check['can_sell']:
+                                    can_execute = True
+                                    print(f"   💰 Using {trade_check['crypto_available']:.6f} {sym.split('-')[0]} (${trade_check['crypto_value_usd']:.2f}) to SELL")
+                                elif trade_check['can_buy']:
+                                    # Have USD but no crypto - can't sell
+                                    print(f"   ⚠️  No {sym.split('-')[0]} to SELL, but have ${trade_check['usd_available']:.2f} USD")
+                                    print(f"   💡 Waiting for BUY signal to acquire crypto first")
+                                    continue
+                                else:
+                                    print(f"   ❌ Insufficient balance for {sym} - need {sym.split('-')[0]} for SELL")
+                                    continue
+                            
+                            if not can_execute:
+                                continue
+                            
                             if coinbase_live:
                                 # REAL MONEY ORDER
                                 order = coin.place_live_order(cand, sizing['size'], confirm_real_money=True)
-                                print(f"🔴 COINBASE LIVE ORDER (REAL $$$): {sym} {cand.side}")
+                                print(f"🔴 COINBASE LIVE (REAL $$$): {sym} {cand.side}")
                             else:
                                 order = coin.place_paper_order(cand, sizing['size'])
+                                print(f"🟢 COINBASE SIM: {sym} {cand.side}")
                             if canary_mode:
                                 _canary_log(f"✅ COINBASE order placed: {order}")
-                        elif chosen == 'ibkr-only':
+                        
+                        # IBKR (disabled currently)
+                        elif platform == 'IBKR':
+                            if ibkr is None:
+                                raise RuntimeError(f'IBKR connector not initialized - cannot trade {sym}')
                             order = ibkr.place_paper_order(cand, sizing['size'])
-                            print(f"🟡 IBKR PAPER ORDER (TWS): {sym} {cand.side}")
+                            print(f"🟡 IBKR PAPER: {sym} {cand.side}")
                             if canary_mode:
-                                _canary_log(f"✅ IBKR PAPER order via TWS: {order}")
+                                _canary_log(f"✅ IBKR order placed: {order}")
+                        
                         else:
-                            # 'auto' or 'multi-asset' or 'platform-paper' behavior
-                            platform = getattr(cand, 'platform', None) or ( 'OANDA' if '_' in sym else 'COINBASE' if '-' in sym else 'IBKR' )
+                            raise RuntimeError(f'Unknown platform {platform} for symbol {sym}')
                             
-                            if platform == 'OANDA' and oanda is not None:
-                                units = int(sizing['size']) if isinstance(sizing['size'], (int, float)) else int(float(sizing['size']))
-                                order = oanda.place_paper_order(cand, units=units)
-                                print(f"🟡 OANDA PRACTICE: {sym} {cand.side} x{units}")
-                            elif platform == 'IBKR' and ibkr is not None:
-                                order = ibkr.place_paper_order(cand, sizing['size'])
-                                print(f"🟡 IBKR PAPER: {sym} {cand.side}")
-                            elif platform == 'COINBASE' and coin is not None:
-                                if coinbase_live:
-                                    # REAL MONEY ORDER
-                                    order = coin.place_live_order(cand, sizing['size'], confirm_real_money=True)
-                                    print(f"🔴 COINBASE LIVE (REAL $$$): {sym} {cand.side}")
-                                else:
-                                    order = coin.place_paper_order(cand, sizing['size'])
-                                    print(f"🟢 COINBASE SIM: {sym} {cand.side}")
-                            else:
-                                # Final fallback to engine
-                                order = engine.place_order(cand, sizing['size'])
-                                print(f"⚠️  FALLBACK to engine: {sym} {cand.side}")
-                            
-                            if canary_mode:
-                                _canary_log(f"✅ Order placed via {platform}: {order}")
                     except Exception as exc:
-                        # Avoid automatic simulated orders when running real platforms.
-                        # Only fallback to the simulated engine if we're in explicit simulate mode
-                        # or if the operator has enabled an override via FORCE_ENGINE_FALLBACK.
-                        force_fallback = os.getenv('FORCE_ENGINE_FALLBACK', 'false').lower() in ('1','true','yes')
-                        if chosen == 'simulate' or force_fallback:
-                            order = engine.place_order(cand, sizing['size'])
-                            print(f'⚠️  PLATFORM ORDER FAILED, fell back to engine (SIMULATED): {exc}')
-                            if canary_mode:
-                                _canary_log(f"⚠️  Platform order FAILED, engine fallback: {exc}")
-                        else:
-                            order = {'status': 'SKIPPED', 'reason': 'platform_failed', 'error': str(exc)}
-                            print(f'⚠️  PLATFORM ORDER FAILED, skipping to avoid simulated trade: {exc}')
-                            if canary_mode:
-                                _canary_log(f"⚠️  Platform order FAILED, skipped: {exc}")
+                        # NO FALLBACK - just log the error and skip
+                        order = {'status': 'FAILED', 'reason': 'platform_error', 'error': str(exc)}
+                        print(f'❌ ORDER FAILED: {sym} {cand.side} - {exc}')
+                        if canary_mode:
+                            _canary_log(f"❌ Order FAILED: {exc}")
                     print('placed order:', order)
                     
                     # Track position in Progressive Position Manager for trailing stops

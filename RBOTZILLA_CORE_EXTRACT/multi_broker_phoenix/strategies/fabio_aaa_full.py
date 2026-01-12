@@ -94,7 +94,10 @@ class FabioAAAFull(Strategy):
 
     # --- Decision + tranche builder ---
     def _evaluate_rules(self, prices: List[float], volumes: Optional[List[float]]=None) -> Optional[Dict[str, Any]]:
-        """Return decision dict when rules match, otherwise None."""
+        """Return decision dict when rules match, otherwise None.
+        
+        Now supports BOTH bullish (BUY) and bearish (SELL) setups for position diversity.
+        """
         if not prices or len(prices) < 20:
             return None
         # Indicators
@@ -104,16 +107,10 @@ class FabioAAAFull(Strategy):
         rsi_slow = self._rsi(prices, 14)
         if None in (ema_fast, ema_slow, rsi_fast, rsi_slow):
             return None
-        # Momentum rule: fast EMA above slow EMA and price above EMAs
+        
         price = prices[-1]
-        if ema_fast <= ema_slow:
-            return None
-        if price <= ema_fast:
-            return None
-        # RSI confirmation: require not deeply oversold (allow strong momentum up to 100)
-        if rsi_slow < self.rsi_threshold:
-            return None
-        # Volume check: optional
+        
+        # Volume check: optional (applies to both directions)
         vol_ok = True
         if volumes and len(volumes) >= 20:
             recent_vol = sum(volumes[-5:]) / 5
@@ -121,24 +118,29 @@ class FabioAAAFull(Strategy):
             vol_ok = recent_vol >= 1.0 * avg_vol
             if not vol_ok:
                 return None
-        # If we get here, we have a bullish setup
-        # Confidence normalized to 0-1 for selection/logging
-        ema_divergence_pct = (ema_fast - ema_slow) / (ema_slow + 1e-12) * 100  # e.g. 0.5% -> 0.5
-        rsi_boost = max(0, (rsi_slow - 50) / 50 * 0.05)  # up to +5%
-        ema_contrib = min(0.10, ema_divergence_pct * 0.05)  # up to +10%
-
-        raw_confidence = 0.65 + ema_contrib + rsi_boost
-        raw_confidence = max(0.60, min(0.95, raw_confidence))
-        # Temporary cap to keep display sane while debugging
-        confidence = min(0.999, raw_confidence)
-
-        import logging
-        logging.info(
-            "[ABSORB DEBUG] price=%.4f ema_fast=%.4f ema_slow=%.4f ema_divergence_pct=%.4f rsi_fast=%.2f rsi_slow=%.2f ema_contrib=%.4f rsi_boost=%.4f raw_conf=%.4f capped_conf=%.4f",
-            price, ema_fast, ema_slow, ema_divergence_pct, rsi_fast, rsi_slow, ema_contrib, rsi_boost, raw_confidence, confidence
-        )
-
-        return {'side': 'BUY', 'confidence': confidence, 'entry_price': price}
+        
+        # ============ BULLISH SETUP (BUY) ============
+        # Fast EMA above slow EMA, price above EMAs, RSI not oversold
+        if ema_fast > ema_slow and price > ema_fast and rsi_slow >= self.rsi_threshold:
+            ema_divergence_pct = (ema_fast - ema_slow) / (ema_slow + 1e-12) * 100
+            rsi_boost = max(0, (rsi_slow - 50) / 50 * 0.05)
+            ema_contrib = min(0.10, ema_divergence_pct * 0.05)
+            raw_confidence = 0.65 + ema_contrib + rsi_boost
+            confidence = max(0.60, min(0.95, raw_confidence))
+            return {'side': 'BUY', 'confidence': confidence, 'entry_price': price}
+        
+        # ============ BEARISH SETUP (SELL) ============
+        # Fast EMA below slow EMA, price below EMAs, RSI not overbought (< 60 means weak)
+        rsi_sell_threshold = 100 - self.rsi_threshold  # If buy threshold is 40, sell is 60
+        if ema_fast < ema_slow and price < ema_fast and rsi_slow <= rsi_sell_threshold:
+            ema_divergence_pct = (ema_slow - ema_fast) / (ema_slow + 1e-12) * 100
+            rsi_boost = max(0, (50 - rsi_slow) / 50 * 0.05)  # Boost when RSI is low
+            ema_contrib = min(0.10, ema_divergence_pct * 0.05)
+            raw_confidence = 0.65 + ema_contrib + rsi_boost
+            confidence = max(0.60, min(0.95, raw_confidence))
+            return {'side': 'SELL', 'confidence': confidence, 'entry_price': price}
+        
+        return None
 
     def _build_tranche_plan(self, entry_price: float, side: str, stop_pct: float, instrument: str = 'EUR_USD') -> List[Dict[str, Any]]:
         """Create 3-tranche plan with partial stops and incremental profit taking.

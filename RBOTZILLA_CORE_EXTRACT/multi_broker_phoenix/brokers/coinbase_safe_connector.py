@@ -197,6 +197,206 @@ class CoinbaseSafeConnector:
             logger.error(f"❌ Error fetching price for {symbol}: {e}")
         return None
     
+    def get_account_balances(self) -> Dict[str, float]:
+        """Get all account balances from Coinbase.
+        
+        Returns:
+            Dict mapping currency -> available balance
+            e.g., {'BTC': 0.018, 'USD': 4.52, 'ETH': 0.001}
+        """
+        if not self._jwt_enabled:
+            logger.warning("JWT not enabled - cannot fetch balances")
+            return {}
+        
+        try:
+            response = self._make_authenticated_request('GET', '/accounts')
+            accounts = response.get('accounts', [])
+            
+            balances = {}
+            for acc in accounts:
+                currency = acc.get('currency', '')
+                avail = float(acc.get('available_balance', {}).get('value', 0))
+                if avail > 0:
+                    balances[currency] = avail
+            
+            return balances
+        except Exception as e:
+            logger.error(f"❌ Failed to get balances: {e}")
+            return {}
+    
+    def get_tradeable_balance_usd(self, symbol: str) -> float:
+        """Get tradeable balance in USD terms for a symbol.
+        
+        For BTC-USD:
+        - If you have BTC, returns BTC value in USD (can SELL)
+        - If you have USD, returns USD (can BUY)
+        - Returns whichever is larger
+        
+        Args:
+            symbol: Trading pair (e.g., 'BTC-USD')
+        
+        Returns:
+            Available tradeable balance in USD terms
+        """
+        balances = self.get_account_balances()
+        price = self.fetch_live_price(symbol) or 0
+        
+        # Parse symbol (BTC-USD -> base=BTC, quote=USD)
+        parts = symbol.split('-')
+        base_currency = parts[0] if parts else ''  # BTC
+        quote_currency = parts[1] if len(parts) > 1 else 'USD'  # USD
+        
+        # Get base currency balance (e.g., BTC)
+        base_balance = balances.get(base_currency, 0)
+        base_value_usd = base_balance * price if price > 0 else 0
+        
+        # Get quote currency balance (e.g., USD)
+        quote_balance = balances.get(quote_currency, 0)
+        
+        logger.info(f"💰 {symbol} tradeable: {base_currency}={base_balance:.6f} (${base_value_usd:.2f}), {quote_currency}=${quote_balance:.2f}")
+        
+        return max(base_value_usd, quote_balance)
+    
+    def can_trade_symbol(self, symbol: str, min_usd: float = 5.0) -> Dict[str, Any]:
+        """Check if we can trade a symbol based on available balances.
+        
+        Args:
+            symbol: Trading pair (e.g., 'BTC-USD')
+            min_usd: Minimum USD value needed to trade
+        
+        Returns:
+            Dict with can_buy, can_sell, and available amounts
+        """
+        balances = self.get_account_balances()
+        price = self.fetch_live_price(symbol) or 0
+        
+        parts = symbol.split('-')
+        base_currency = parts[0] if parts else ''
+        quote_currency = parts[1] if len(parts) > 1 else 'USD'
+        
+        base_balance = balances.get(base_currency, 0)
+        quote_balance = balances.get(quote_currency, 0)
+        base_value_usd = base_balance * price if price > 0 else 0
+        
+        return {
+            'symbol': symbol,
+            'can_buy': quote_balance >= min_usd,  # Need USD to BUY crypto
+            'can_sell': base_value_usd >= min_usd,  # Need crypto to SELL
+            'usd_available': quote_balance,
+            'crypto_available': base_balance,
+            'crypto_value_usd': base_value_usd,
+            'price': price
+        }
+
+    def auto_ensure_trading_capital(self, symbol: str = 'BTC-USD', target_usd: float = None) -> bool:
+        """Automatically ensure we have USD trading capital by selling crypto if needed.
+        
+        This enables FULLY AUTOMATED trading:
+        - If we have crypto but no USD, sell some crypto to get USD
+        - This gives us capital to trade BOTH directions (BUY and SELL)
+        
+        Args:
+            symbol: Trading pair (default BTC-USD)
+            target_usd: Target USD amount to have (default from env or $50)
+        
+        Returns:
+            True if we now have sufficient USD, False otherwise
+        """
+        if not self._jwt_enabled:
+            logger.warning("JWT not enabled - cannot auto-convert")
+            return False
+        
+        target_usd = target_usd or float(os.getenv('COINBASE_AUTO_CONVERT_TARGET_USD', '50'))
+        min_trade = float(os.getenv('COINBASE_MIN_TRADE_USD', '5'))
+        
+        balances = self.get_account_balances()
+        usd_balance = balances.get('USD', 0)
+        
+        # Already have enough USD
+        if usd_balance >= target_usd:
+            logger.info(f"✅ Already have ${usd_balance:.2f} USD (target: ${target_usd:.2f})")
+            return True
+        
+        # Need more USD - check if we can sell crypto
+        parts = symbol.split('-')
+        base_currency = parts[0]  # BTC, ETH, etc.
+        
+        crypto_balance = balances.get(base_currency, 0)
+        price = self.fetch_live_price(symbol)
+        
+        if not price or price <= 0:
+            logger.error(f"Cannot get price for {symbol}")
+            return False
+        
+        crypto_value_usd = crypto_balance * price
+        
+        # Check if we have enough crypto to sell
+        amount_needed = target_usd - usd_balance
+        if crypto_value_usd < amount_needed:
+            logger.warning(f"Not enough {base_currency} to convert: have ${crypto_value_usd:.2f}, need ${amount_needed:.2f}")
+            # Still sell what we can if it's above minimum
+            if crypto_value_usd < min_trade:
+                return False
+            amount_needed = crypto_value_usd * 0.9  # Sell 90% of what we have
+        
+        # Calculate how much crypto to sell
+        crypto_to_sell = amount_needed / price
+        
+        # Round appropriately
+        if base_currency == 'BTC':
+            crypto_to_sell = round(crypto_to_sell, 8)
+        elif base_currency == 'ETH':
+            crypto_to_sell = round(crypto_to_sell, 8)
+        else:
+            crypto_to_sell = round(crypto_to_sell, 6)
+        
+        logger.info(f"🔄 AUTO-CONVERTING: Selling {crypto_to_sell:.8f} {base_currency} (~${amount_needed:.2f}) to get USD")
+        
+        try:
+            # Place market sell order to get USD quickly
+            order_response = self._place_market_sell_order(symbol, crypto_to_sell)
+            
+            if order_response.get('success_response') or order_response.get('order_id'):
+                logger.info(f"✅ AUTO-CONVERT SUCCESS: Sold {crypto_to_sell:.8f} {base_currency} for ~${amount_needed:.2f} USD")
+                return True
+            else:
+                error = order_response.get('error_response', {}).get('message', 'Unknown error')
+                logger.error(f"❌ AUTO-CONVERT FAILED: {error}")
+                return False
+                
+        except Exception as e:
+            logger.error(f"❌ AUTO-CONVERT ERROR: {e}")
+            return False
+    
+    def _place_market_sell_order(self, symbol: str, size: float) -> Dict:
+        """Place a market sell order for quick execution.
+        
+        Used for auto-converting crypto to USD.
+        """
+        # Round size appropriately
+        if 'BTC' in symbol:
+            size = round(size, 8)
+        elif 'ETH' in symbol:
+            size = round(size, 8)
+        else:
+            size = round(size, 6)
+        
+        order_data = {
+            'product_id': symbol,
+            'side': 'SELL',
+            'order_configuration': {
+                'market_market_ioc': {
+                    'base_size': f"{size:.8f}".rstrip('0').rstrip('.')
+                }
+            },
+            'client_order_id': f"RICK-CONVERT-{int(time.time() * 1000)}"
+        }
+        
+        logger.info(f"📤 AUTO-CONVERT Market Sell: {json.dumps(order_data, indent=2)}")
+        
+        return self._make_authenticated_request('POST', '/orders', order_data)
+
+    
     def get_historical_data(self, symbol: str, periods: int = 50, granularity: int = 300) -> List[float]:
         """Fetch historical price data (close prices) from Coinbase public API.
         
@@ -901,22 +1101,57 @@ Daily Loss: ${self._daily_loss_current:.2f}/${self.daily_loss_limit:.2f}
         Args:
             symbol: Trading pair (e.g., 'BTC-USD')
             side: 'buy' or 'sell'
-            size: Amount to trade
+            size: Amount to trade (in base currency for SELL, USD notional for BUY)
             price: Limit price (uses limit order for safety)
         
         Returns:
             Order response from Coinbase API
+            
+        Order Sizing Logic:
+        - BUY: Use quote_size (USD amount) - "I want to spend $X USD to buy crypto"
+        - SELL: Use base_size (crypto amount) - "I want to sell X BTC"
+        
+        This allows trading with either USD or crypto balance!
         """
+        # Round price to 2 decimals for USD pairs
+        price = round(price, 2)
+        
+        # Build order configuration based on side
+        if side.upper() == 'BUY':
+            # BUY orders: Use quote_size (USD amount you want to spend)
+            # This works even with 0 USD if you're using available balance
+            quote_size = round(size * price, 2)  # USD amount
+            order_config = {
+                'limit_limit_gtc': {
+                    'quote_size': f"{quote_size:.2f}",
+                    'limit_price': f"{price:.2f}",
+                    'post_only': False
+                }
+            }
+            logger.info(f"📤 BUY order using quote_size: ${quote_size:.2f} USD")
+        else:
+            # SELL orders: Use base_size (crypto amount you want to sell)
+            # Round size to proper precision for each asset
+            if 'BTC' in symbol:
+                size = round(size, 8)
+            elif 'ETH' in symbol:
+                size = round(size, 8)
+            else:
+                size = round(size, 6)
+            
+            order_config = {
+                'limit_limit_gtc': {
+                    'base_size': f"{size:.8f}".rstrip('0').rstrip('.'),
+                    'limit_price': f"{price:.2f}",
+                    'post_only': False
+                }
+            }
+            logger.info(f"📤 SELL order using base_size: {size:.8f} {symbol.split('-')[0]}")
+        
         order_data = {
             'product_id': symbol,
             'side': side.upper(),
-            'order_configuration': {
-                'limit_limit_gtc': {
-                    'base_size': str(size),
-                    'limit_price': str(price),
-                    'post_only': False
-                }
-            },
+            'order_configuration': order_config,
             'client_order_id': f"RICK-{int(time.time() * 1000)}"
         }
         

@@ -82,15 +82,14 @@ class PaperEngine:
         """
         # Configurable behavior
         # === POSITION AWARENESS & REVERSAL LOGIC ===
-        # Paper engine uses SAME thresholds as OANDA connector for identical behavior
         allow_reversal = os.getenv('OANDA_ALLOW_REVERSAL_ON_OPPOSITE_SIGNAL', os.getenv('OANDA_ALLOW_REVERSAL', 'true')).lower() in ('1', 'true', 'yes')
         reversal_min_conf = float(os.getenv('OANDA_REVERSAL_MIN_CONFIDENCE', '0.75'))
-        conf_threshold = float(os.getenv('OANDA_SIGNAL_CONFIDENCE_THRESHOLD', '0.65'))  # Match AI Hive default
+        conf_threshold = float(os.getenv('OANDA_SIGNAL_CONFIDENCE_THRESHOLD', '0.70'))
         symbol = getattr(candidate, 'symbol', None)
         side = getattr(candidate, 'side', None)
         confidence = getattr(candidate, 'confidence', None)
 
-        # Confidence filter - SAME as OANDA connector for training parity
+        # Confidence filter
         if confidence is not None and float(confidence) < conf_threshold:
             logger = __import__('logging').getLogger(__name__)
             logger.info('Skipping simulated order for %s: confidence %.3f < threshold %.3f', symbol, float(confidence), conf_threshold)
@@ -147,12 +146,16 @@ class PaperEngine:
             fill_price = entry * (1.0 - self.slippage_pct)
         fees = abs(fill_price * float(size) * self.fee_pct)
         ts = datetime.utcnow().isoformat()
+        # Ensure required fields have valid defaults
+        strategy_id = str(getattr(candidate, 'strategy_id', getattr(candidate, 'strategy', 'unknown')))
+        symbol_val = str(getattr(candidate, 'symbol', 'UNKNOWN'))
+        side_val = str(side) if side else 'BUY'
         order = PaperOrder(
             id=oid,
             platform=self.platform,
-            strategy_id=getattr(candidate, 'strategy_id', getattr(candidate, 'strategy', None)),
-            symbol=getattr(candidate, 'symbol', None),
-            side=side,
+            strategy_id=strategy_id,
+            symbol=symbol_val,
+            side=side_val,
             entry=entry,
             fill_price=fill_price,
             stop=stop,
@@ -162,33 +165,11 @@ class PaperEngine:
             ts=ts,
             execution_type=execution_type,
         )
-        # Resilient insert: handle integrity and locked DB errors gracefully with retries
-        retries = 5
-        for attempt in range(retries):
-            try:
-                cur.execute(
-                    "INSERT INTO trades (id, ts, platform, strategy_id, symbol, side, entry, fill_price, stop, size, fees, status, execution_type) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                    (order.id, order.ts, order.platform, order.strategy_id, order.symbol, order.side, order.entry, order.fill_price, order.stop, order.size, order.fees, order.status, order.execution_type),
-                )
-                conn.commit()
-                break
-            except sqlite3.IntegrityError as e:
-                logger = __import__('logging').getLogger(__name__)
-                logger.error('DB IntegrityError inserting order %s: %s', order.id, e)
-                if self._conn is None:
-                    conn.close()
-                return {'status': 'SKIPPED', 'reason': 'db_integrity', 'error': str(e)}
-            except sqlite3.OperationalError as e:
-                # Retry on database locked; otherwise fail fast
-                if 'locked' in str(e).lower() and attempt < retries - 1:
-                    import time
-                    time.sleep(0.1)
-                    continue
-                logger = __import__('logging').getLogger(__name__)
-                logger.error('DB OperationalError inserting order %s: %s', order.id, e)
-                if self._conn is None:
-                    conn.close()
-                return {'status': 'SKIPPED', 'reason': 'db_locked', 'error': str(e)}
+        cur.execute(
+            "INSERT INTO trades (id, ts, platform, strategy_id, symbol, side, entry, fill_price, stop, size, fees, status, execution_type) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+            (order.id, order.ts, order.platform, order.strategy_id, order.symbol, order.side, order.entry, order.fill_price, order.stop, order.size, order.fees, order.status, order.execution_type),
+        )
+        conn.commit()
         # write audit entry for this trade
         try:
             self._record_audit({'id': f"AUDIT-{order.id}", 'ts': order.ts, 'type': 'trade', 'payload': order.__dict__})
@@ -225,4 +206,3 @@ class PaperEngine:
         cur.execute("DELETE FROM trades")
         conn.commit()
         conn.close()
-```

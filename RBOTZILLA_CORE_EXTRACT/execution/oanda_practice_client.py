@@ -153,4 +153,11 @@ class OandaPracticeClient:
             return response.json()
         except Exception as exc:
             logger.error('OANDA API request failed: %s %s', method.upper(), url)
+            # Log the full error response for debugging
+            if hasattr(exc, 'response') and exc.response is not None:
+                try:
+                    error_body = exc.response.json()
+                    logger.error('OANDA Error details: %s', error_body)
+                except Exception:
+                    logger.error('OANDA Error text: %s', exc.response.text[:500])
             raise
