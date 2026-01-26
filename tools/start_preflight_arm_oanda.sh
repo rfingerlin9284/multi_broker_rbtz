@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+REPO="/home/ing/RICK/MULTI_BROKER_PHOENIX"
+cd "$REPO"
+
+# Load env
+set -a
+[[ -f .env ]] && source .env
+[[ -f config/toggles.env ]] && source config/toggles.env
+set +a
+
+# Force OANDA only
+export BROKER_OANDA_ENABLED=1 OANDA_ENABLED=1
+export BROKER_COINBASE_ENABLED=0 COINBASE_ENABLED=0
+export BROKER_IBKR_ENABLED=0 IBKR_ENABLED=0
+
+# Paper-safety gate: refuse LIVE unless explicitly allowed
+ALLOW_LIVE="${ALLOW_LIVE:-0}"
+if [[ -f .env ]]; then
+  if grep -qiE 'fxtrade|api-fxtrade' .env; then
+    if [[ "$ALLOW_LIVE" != "1" ]]; then
+      echo "❌ LIVE OANDA endpoint detected in .env (fxtrade/api-fxtrade)."
+      echo "   Refusing to arm for safety."
+      echo "   If you INTEND live: run task again with ALLOW_LIVE=1 (we can add later)."
+      exit 1
+    fi
+  fi
+fi
+
+echo "→ Starting system (this will auto-run preflight)..."
+./tools/start_full_system.sh
+
+# Preflight creates a PASS marker (support a few names)
+PASS_FILE=""
+for f in \
+  "$REPO/ops/state/preflight_oanda.ok" \
+  "$REPO/ops/state/oanda_preflight.pass" \
+  "$REPO/ops/state/preflight_oanda.pass" \
+  "$REPO/ops/state/oanda_preflight.PASS" \
+; do
+  [[ -f "$f" ]] && PASS_FILE="$f" && break
+done
+
+# If preflight hasn’t written marker yet, wait a bit (but don’t hang forever)
+if [[ -z "$PASS_FILE" ]]; then
+  echo "→ Waiting for preflight PASS marker..."
+  for _ in $(seq 1 20); do
+    for f in \
+      "$REPO/ops/state/preflight_oanda.ok" \
+  "$REPO/ops/state/oanda_preflight.pass" \
+      "$REPO/ops/state/preflight_oanda.pass" \
+      "$REPO/ops/state/oanda_preflight.PASS" \
+    ; do
+      [[ -f "$f" ]] && PASS_FILE="$f" && break
+    done
+    [[ -n "$PASS_FILE" ]] && break
+    sleep 1
+  done
+fi
+
+if [[ -z "$PASS_FILE" ]]; then
+  echo "❌ Preflight PASS marker not found. Check output above (preflight must PASS)."
+  exit 1
+fi
+
+echo "✅ Preflight marker found: $PASS_FILE"
+echo "→ Arming OANDA (unlock guard, enable trading)..."
+
+# PIN via env or prompt
+PIN="${RBOTZILLA_GUARD_PIN:-${1:-}}"
+if [[ -z "$PIN" ]]; then
+  read -r -s -p "Enter Guard PIN: " PIN
+  echo
+fi
+
+./tools/arm_oanda.sh "$PIN"
+
+echo
+echo "✅ DONE: System running + preflight PASS + guard unlocked."
+echo "   Now it will place trades when strategy signals fire."
+echo
+echo "Quick verify:"
+echo "  ./tools/status_full_system.sh"
+echo "  tail -60 /home/ing/RICK/logs/oanda/engine.log"
