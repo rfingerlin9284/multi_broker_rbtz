@@ -48,13 +48,20 @@ def test_retry_metrics_called_when_retry_attempts(monkeypatch):
         if k=='hive_retry_success':
             calls['retry_success']+=1
 
-    monkeypatch.setattr('multi_broker_phoenix.monitor.bot_metrics.incr', fake_incr, raising=False)
+    # Install a fake bot_metrics module into sys.modules so incr() calls are captured
+    import types, sys
+    mod = types.SimpleNamespace(incr=fake_incr)
+    sys.modules['multi_broker_phoenix.monitor.bot_metrics'] = mod
 
     # Setup: Grok neutral (returns neutral AIVote), then on retry seat router returns a real vote
     grok_neutral = AIVote(ai_name='Grok', signal='neutral', confidence=0.5, reasoning='neutral')
     real_retry = AIVote(ai_name='Grok', signal='buy', confidence=0.8, reasoning='retry buy')
 
     h = AIHive()
+    # Disable the router so retry uses Grok directly in test
+    h.router = None
+    h.grok_key = True
+
     monkeypatch.setattr(h, '_query_grok', lambda p: grok_neutral)
     # For retry, make _query_grok return a real vote when called with concise prompt (we detect by content)
     def grok_retry(p):
