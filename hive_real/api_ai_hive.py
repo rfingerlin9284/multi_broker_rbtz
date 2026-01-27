@@ -265,6 +265,11 @@ Should this trade be taken? Analyze and respond with JSON only."""
                 # If we got a retry vote from a real seat, prioritize it and record success
                 if retry_vote and retry_vote.ai_name.lower() not in ('multiindicator', 'deepseek'):
                     votes.insert(0, retry_vote)
+                    # Record which seat produced the successful retry for narration/telemetry
+                    try:
+                        self._last_retry_source = retry_vote.ai_name
+                    except Exception:
+                        self._last_retry_source = None
                     try:
                         from multi_broker_phoenix.monitor.bot_metrics import incr
                         incr('hive_retry_success')
@@ -669,7 +674,8 @@ def _write_ai_narration(symbol: str, direction: str, entry_price: float,
         
         output = {
             'current': narration,
-            'history': history
+            'history': history,
+            'retry_source': result.get('retry_source') if isinstance(result, dict) else None
         }
         
         with open(narration_file, 'w') as f:
@@ -691,8 +697,11 @@ def get_api_ai_vote(symbol: str, direction: str, entry_price: float,
     # analyze() now prints all human-readable output
     result = _hive.analyze(symbol, direction, entry_price, prices)
     
-    # Write narration for any external monitoring
-    _write_ai_narration(symbol, direction, entry_price, result, market_data)
+    # Expose info about retry source if any (for narration/telemetry)
+    try:
+        result['retry_source'] = getattr(_hive, '_last_retry_source', None)
+    except Exception:
+        result['retry_source'] = None
 
     # Metrics: record signals and approvals/rejects (only if metrics enabled)
     try:
