@@ -32,7 +32,7 @@ class AIHive:
         self.openai_key = os.getenv('OPENAI_API_KEY')
         self.grok_model = os.getenv('XAI_MODEL', 'grok-4-latest')
         self.openai_model = os.getenv('OPENAI_MODEL', 'gpt-4o-mini')
-        self.threshold = float(os.getenv('HIVE_APPROVAL_THRESHOLD', '0.30'))
+        self.threshold = float(os.getenv('HIVE_APPROVAL_THRESHOLD', '0.70'))  # FIXED: Was 0.30 - rubber-stamping!
         self.deepseek_key = os.getenv('DEEPSEEK_API_KEY')
         self.use_seat_router = os.getenv('ENABLE_SEAT_ROUTER', '1').lower() in ('1', 'true', 'yes')
         self.router = AISeatRouter() if (AISeatRouter and self.use_seat_router) else None
@@ -42,6 +42,12 @@ class AIHive:
         self._rate_limit_cooldown = 60
         
         # Use the canonical Hive Charter system prompt
+        try:
+            from hive_real.charter import get_system_prompt
+            self.system_prompt = get_system_prompt()
+        except Exception:
+            # Fallback short instruction
+            self.system_prompt = "You are a trading analyst; respond with a single JSON object summarizing your decision."
     
     def _signal_to_english(self, signal: str, confidence: float) -> str:
         """Convert AI signal to plain English."""
@@ -65,16 +71,42 @@ class AIHive:
             return f"\"STOP! Don't take this trade - too risky! ({conf_pct}%)\""
         else:
             return f"\"Not sure about this one... staying neutral ({conf_pct}%).\""
+
+    def _build_concise_prompt(self, symbol: str, direction: str, price: float, prices: list) -> str:
+        """Build a short, directive prompt that asks the LLM to return a compact JSON decision.
+        The concise prompt reduces ambiguity and encourages a BUY/SELL/HOLD decision with a numeric confidence."""
+        # Compute a few simple indicators for context
+        short_avg = None
+        long_avg = None
+        momentum = 0.0
         try:
-            from hive_real.charter import get_system_prompt
-            self.system_prompt = get_system_prompt()
+            if prices and len(prices) >= 3:
+                short_n = min(5, len(prices))
+                long_n = min(20, len(prices))
+                short_avg = sum(prices[-short_n:]) / short_n
+                long_avg = sum(prices[-long_n:]) / long_n if len(prices) >= long_n else None
+                momentum = ((prices[-1] - prices[0]) / (prices[0] if prices[0] else 1.0)) * 100
         except Exception:
-            # Fallback short instruction
-            self.system_prompt = "You are a trading analyst; respond with a single JSON object summarizing your decision."
+            pass
+
+        parts = [f"Symbol: {symbol}", f"Direction: {direction}", f"Entry: {price:.5f}"]
+        if short_avg is not None:
+            parts.append(f"ShortAvg: {short_avg:.5f}")
+        if long_avg is not None:
+            parts.append(f"LongAvg: {long_avg:.5f}")
+        parts.append(f"Momentum: {momentum:+.2f}%")
+
+        prompt = (
+            "Please respond with a single JSON object and nothing else. "
+            "Fields: {\"decision\":\"BUY|SELL|HOLD\", \"confidence\":0.0-1.0, \"reasoning\":\"one sentence\"}. "
+            "Short facts: " + ", ".join(parts)
+        )
+        return prompt
 
 
     def analyze(self, symbol: str, direction: str, price: float, 
                 prices: list = None) -> Dict[str, Any]:
+
         """Get AI consensus on a trade. Returns decision dict."""
         
         prices = prices or []
@@ -149,26 +181,20 @@ Should this trade be taken? Analyze and respond with JSON only."""
             remaining = int(self._openai_blocked_until - time.time())
             print(f"   • GPT: Taking a break ({remaining}s cooldown)")
         
-        # 4. DeepSeek fallback when Grok/OpenAI fail but we still have credentials
+        # 4. Try live DeepSeek provider (only if a real key present and enabled)
         if self.deepseek_key and not votes:
-            vote = self._simulate_deepseek_vote(direction, price, prices)
+            vote = self._query_deepseek_live(prompt)
             if vote:
                 votes.append(vote)
                 opinion = self._signal_to_english(vote.signal, vote.confidence)
-                print(f"   • DEEPSEEK says: {opinion}")
+                print(f"   • DEEPSEEK (live) says: {opinion}")
         elif not self.deepseek_key and not votes:
             print("   • No cloud AI available right now")
 
-        # 5. DeepSeek preference + MultiIndicator augmentation
-        # Prefer DeepSeek fallback when Grok/OpenAI are unavailable. Additionally
-        # compute a MultiIndicator consensus (momentum + SMA + volatility) to
-        # augment votes. MultiIndicator helps the decision but will not override
-        # a VETO and will not auto-approve unless its confidence exceeds 0.60.
-        if not votes and self.deepseek_key:
-            vote = self._simulate_deepseek_vote(direction, price, prices)
-            if vote:
-                votes.append(vote)
-                print(f"   ✅ DeepSeek fallback: {vote.signal.upper()} ({vote.confidence:.0%})")
+        # 5. Prefer live DeepSeek when available; do NOT simulate votes.
+        # MultiIndicator augmentation still applies but will not override vetos
+        # or be considered a 'real' AI seat for approval decisions.
+        # (No automatic simulated DeepSeek votes will be used.)
 
         # Always compute MultiIndicator vote to augment AI votes when possible.
         try:
@@ -178,6 +204,75 @@ Should this trade be taken? Analyze and respond with JSON only."""
                 print(f"   ✅ MultiIndicator: {mi_vote.signal.upper()} ({mi_vote.confidence:.0%}) - {mi_vote.reasoning}")
         except Exception as e:
             print(f"   ❌ MultiIndicator error: {e}")
+
+        # If we don't have a clear real AI BUY/SELL vote, retry once with a concise
+        # directive prompt aimed at eliciting a firm BUY/SELL/HOLD decision from
+        # cloud LLM seats (helps Grok/OpenAI avoid neutral defaults).
+        try:
+            real_ai_votes = [v for v in votes if v.ai_name.lower() not in ('multiindicator', 'deepseek')]
+            real_buy_sell = [v for v in real_ai_votes if v.signal in ('buy', 'sell')]
+            avg_conf_real = (sum(v.confidence for v in real_ai_votes) / len(real_ai_votes)) if real_ai_votes else 0.0
+
+            need_retry = False
+            # Retry if no real buy/sell vote or low average confidence
+            if not real_buy_sell or avg_conf_real < 0.6:
+                need_retry = True
+
+            if need_retry:
+                # Record retry attempt for telemetry
+                try:
+                    from multi_broker_phoenix.monitor.bot_metrics import incr
+                    incr('hive_retry')
+                except Exception:
+                    pass
+
+                print("   ℹ️  Retrying with concise, directive prompt to cloud LLMs to get clear BUY/SELL decision")
+                concise = self._build_concise_prompt(symbol, direction, price, prices)
+                retry_vote = None
+
+                # Seat router (if present) first
+                if self.router:
+                    retry = self._query_seat_router(concise)
+                    if retry:
+                        retry_vote = retry
+                        opinion = self._signal_to_english(retry.signal, retry.confidence)
+                        print(f"   • {retry.ai_name.upper()} (retry) says: {opinion}")
+
+                # Grok
+                if not retry_vote and self.grok_key:
+                    retry = self._query_grok(concise)
+                    if retry:
+                        retry_vote = retry
+                        opinion = self._signal_to_english(retry.signal, retry.confidence)
+                        print(f"   • GROK (retry) says: {opinion}")
+
+                # OpenAI
+                if not retry_vote and self.openai_key and time.time() > self._openai_blocked_until:
+                    retry = self._query_openai(concise)
+                    if retry:
+                        retry_vote = retry
+                        opinion = self._signal_to_english(retry.signal, retry.confidence)
+                        print(f"   • GPT (retry) says: {opinion}")
+
+                # DeepSeek live
+                if not retry_vote and self.deepseek_key:
+                    retry = self._query_deepseek_live(concise)
+                    if retry:
+                        retry_vote = retry
+                        opinion = self._signal_to_english(retry.signal, retry.confidence)
+                        print(f"   • DEEPSEEK (retry) says: {opinion}")
+
+                # If we got a retry vote from a real seat, prioritize it and record success
+                if retry_vote and retry_vote.ai_name.lower() not in ('multiindicator', 'deepseek'):
+                    votes.insert(0, retry_vote)
+                    try:
+                        from multi_broker_phoenix.monitor.bot_metrics import incr
+                        incr('hive_retry_success')
+                    except Exception:
+                        pass
+                    print("   ✅ Retry produced a real AI vote; re-evaluating consensus.")
+        except Exception as e:
+            print(f"   ⚠️ Retry logic error: {e}")
 
         return self._consensus(votes)
     
@@ -345,8 +440,18 @@ Should this trade be taken? Analyze and respond with JSON only."""
                 'votes': []
             }
         
-        # Check for veto
+        # Deduplicate votes by AI seat (keep first/latest per seat) to avoid retry double-counting
+        deduped = []
+        seen = set()
         for v in votes:
+            name = v.ai_name.lower()
+            if name in seen:
+                continue
+            seen.add(name)
+            deduped.append(v)
+
+        # Check for veto
+        for v in deduped:
             if v.signal == 'veto':
                 print(f"   🛑 VETO! {v.ai_name} says this trade is too risky!")
                 print(f"      \"{v.reasoning}\"")
@@ -355,14 +460,29 @@ Should this trade be taken? Analyze and respond with JSON only."""
                     'decision': 'reject',
                     'confidence': v.confidence,
                     'reasoning': f'VETO by {v.ai_name}: {v.reasoning}',
-                    'votes': [self._vote_dict(v) for v in votes]
+                    'votes': [self._vote_dict(v) for v in deduped]
                 }
-        
-        # Count signals
-        buy = sum(1 for v in votes if v.signal == 'buy')
-        sell = sum(1 for v in votes if v.signal == 'sell')
-        neutral = sum(1 for v in votes if v.signal == 'neutral')
-        total = len(votes)
+
+        # Count signals (on deduped votes)
+        buy = sum(1 for v in deduped if v.signal == 'buy')
+        sell = sum(1 for v in deduped if v.signal == 'sell')
+        neutral = sum(1 for v in deduped if v.signal == 'neutral')
+        total = len(deduped)
+
+        # CRITICAL: Require at least 1 REAL cloud AI vote before approving
+        # MultiIndicator and DeepSeek fallback alone should NOT approve trades
+        real_ai_votes = [v for v in deduped if v.ai_name.lower() not in ('multiindicator', 'deepseek')]
+        real_buy_sell = [v for v in real_ai_votes if v.signal in ('buy', 'sell')]
+
+        if not real_buy_sell:
+            print(f"   ⚠️  NO REAL AI VOTES - Only fallback/indicators voted")
+            print(f"   RESULT: Trade REJECTED (require cloud AI analysis)")
+            return {
+                'decision': 'reject',
+                'confidence': 0.0,
+                'reasoning': 'No real cloud AI votes - only fallbacks/indicators',
+                'votes': [self._vote_dict(v) for v in deduped]
+            }
         
         buy_pct = buy / total
         sell_pct = sell / total
@@ -451,34 +571,24 @@ Should this trade be taken? Analyze and respond with JSON only."""
             print(f"   ❌ _multi_indicator_vote error: {e}")
             return None
 
-    def _simulate_deepseek_vote(self, direction: str, price: float, prices: list) -> Optional[AIVote]:
-        """Produce a DeepSeek vote when the live provider currently cannot answer."""
-        signal = 'neutral'
-        if direction:
-            norm = direction.lower()
-            if 'buy' in norm:
-                signal = 'buy'
-            elif 'sell' in norm:
-                signal = 'sell'
-
-        confidence = 0.65
-        reasoning = f"DeepSeek fallback aligned with requested {signal.upper()} direction."
-        if prices:
-            trend = prices[-1] - prices[0]
-            if signal == 'buy' and trend < 0:
-                confidence -= 0.2
-                reasoning += " Price is drifting lower, leaning cautious."
-            if signal == 'sell' and trend > 0:
-                confidence -= 0.2
-                reasoning += " Price is drifting higher, leaning cautious."
-
-        confidence = max(0.4, min(confidence, 0.9))
-        return AIVote(
-            ai_name='DeepSeek',
-            signal=signal,
-            confidence=confidence,
-            reasoning=reasoning
-        )
+    def _query_deepseek_live(self, prompt: str) -> Optional[AIVote]:
+        """Query the live DeepSeek provider and parse response into an AIVote.
+        Returns None if DeepSeek is not enabled or fails to provide a valid vote."""
+        try:
+            from ai_router.providers.deepseek_provider import DeepSeekProvider
+            prov = DeepSeekProvider()
+            if not prov.enabled():
+                print("   • DEEPSEEK (live): no API key configured")
+                return None
+            res = prov.generate(prompt, system_prompt=self.system_prompt)
+            if not res.get('ok'):
+                print(f"   • DEEPSEEK (live) error: {res.get('error')}")
+                return None
+            content = res.get('response', '')
+            return self._parse_response(content, 'DeepSeek')
+        except Exception as e:
+            print(f"   ❌ DeepSeek live query failed: {e}")
+            return None
 
 
 # Global instance
