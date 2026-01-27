@@ -1,0 +1,18 @@
+{
+  "xai": {
+    "base_url": "https://api.x.ai/v1",
+    "health_path": "/models"
+  },
+  "deepseek": {
+    "base_url": "https://api.deepseek.com/v1",
+    "health_path": "/models"
+  },
+  "openai": {
+    "base_url": "https://api.openai.com/v1",
+    "health_path": "/models"
+  },
+  "ollama": {
+    "base_url": "http://127.0.0.1:11434",
+    "health_path": "/api/tags"
+  }
+}

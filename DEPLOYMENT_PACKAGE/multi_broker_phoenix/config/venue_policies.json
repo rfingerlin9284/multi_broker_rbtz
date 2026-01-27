@@ -1,0 +1,51 @@
+{
+  "coinbase": {
+    "market": "crypto_spot",
+    "allowed_pairs": [
+      "BTC-USD",
+      "ETH-USD"
+    ],
+    "min_notional_usd": 100,
+    "enforce_time_windows_live": true,
+    "time_windows_newyork": [
+      {
+        "days": [
+          "MON",
+          "TUE",
+          "WED",
+          "THU",
+          "FRI"
+        ],
+        "start": "08:00",
+        "end": "12:30"
+      }
+    ],
+    "notes": "Live Coinbase: restrict to liquid US morning window by default."
+  },
+  "ibkr": {
+    "market": "equities_etf",
+    "allowed_symbols": [
+      "SPY",
+      "QQQ",
+      "IWM"
+    ],
+    "reject_crypto_symbols": true,
+    "reject_forex_symbols": true,
+    "max_position_usd": 600,
+    "enforce_time_windows_live": true,
+    "time_windows_newyork": [
+      {
+        "days": [
+          "MON",
+          "TUE",
+          "WED",
+          "THU",
+          "FRI"
+        ],
+        "start": "09:30",
+        "end": "16:00"
+      }
+    ],
+    "notes": "IBKR: tuned for equities/ETFs. Forex goes to OANDA; crypto goes to Coinbase."
+  }
+}

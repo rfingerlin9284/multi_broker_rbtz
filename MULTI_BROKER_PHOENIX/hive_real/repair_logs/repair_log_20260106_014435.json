@@ -1,0 +1,8 @@
+{
+  "timestamp": "2026-01-06T01:44:35.222933",
+  "error_type": "AttributeError",
+  "error_message": "'TradeCandidate' object has no attribute 'entry'",
+  "status": "MODULE_MISSING",
+  "success": false,
+  "details": "Repair module not installed"
+}

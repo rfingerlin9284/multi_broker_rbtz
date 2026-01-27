@@ -1,0 +1,36 @@
+# Secrets / environment files
+.env
+.env.*
+!.env.example
+!.env.example.*
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+.venv/
+MULTI_BROKER_PHOENIX/.venv/
+
+# Logs / runtime artifacts
+logs/
+/tmp/
+*.log
+
+# Keys / certs
+*.pem
+*.key
+*.p12
+
+# OS / editor
+.DS_Store
+.vscode/
+audit_runs/
+*.out
+ops/secrets.env

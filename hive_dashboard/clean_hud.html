@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 RICK BATTLESTATION - Live Trading HUD</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Orbitron', monospace;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 100%);
+            color: #00ff88;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 30px;
+            background: rgba(0, 255, 136, 0.1);
+            border: 2px solid #00ff88;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
+        }
+        
+        .header h1 {
+            font-size: 42px;
+            color: #ffaa00;
+            text-shadow: 0 0 20px #ffaa00;
+            margin-bottom: 10px;
+        }
+        
+        .header .subtitle {
+            font-size: 16px;
+            color: #00ff88;
+            opacity: 0.8;
+        }
+        
+        .connection-badge {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #f44;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #f44;
+            font-weight: bold;
+            z-index: 1000;
+        }
+        
+        .connection-badge.connected {
+            border-color: #0f0;
+            color: #0f0;
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        
+        .panel {
+            background: rgba(0, 20, 0, 0.9);
+            border: 2px solid #00ff88;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
+        }
+        
+        .panel-title {
+            font-size: 22px;
+            color: #ffaa00;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px #ffaa00;
+            border-bottom: 2px solid #333;
+            padding-bottom: 12px;
+        }
+        
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #1a1a1a;
+            font-size: 15px;
+        }
+        
+        .stat-label {
+            color: #888;
+            font-weight: 600;
+        }
+        
+        .stat-value {
+            color: #00ff88;
+            font-weight: bold;
+        }
+        
+        .stat-value.positive { color: #0f0; }
+        .stat-value.negative { color: #f44; }
+        .stat-value.neutral { color: #ffaa00; }
+        
+        .big-number {
+            font-size: 36px;
+            text-align: center;
+            padding: 20px;
+            text-shadow: 0 0 15px currentColor;
+        }
+        
+        .position-list {
+            margin-top: 15px;
+        }
+        
+        .position-item {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 12px;
+            margin: 8px 0;
+            border-left: 4px solid #00ff88;
+            border-radius: 4px;
+        }
+        
+        .position-header {
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        
+        .position-details {
+            font-size: 13px;
+            color: #888;
+            display: flex;
+            gap: 15px;
+        }
+        
+        .event-log {
+            max-height: 400px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            border-radius: 8px;
+        }
+        
+        .event-item {
+            padding: 10px;
+            margin: 5px 0;
+            border-left: 3px solid #00ff88;
+            background: rgba(0, 255, 136, 0.05);
+            border-radius: 3px;
+            font-size: 13px;
+        }
+        
+        .event-time {
+            color: #666;
+            font-size: 11px;
+        }
+        
+        .phase-indicator {
+            background: linear-gradient(135deg, #ff6b00 0%, #ffaa00 100%);
+            color: #000;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: bold;
+            box-shadow: 0 0 25px rgba(255, 170, 0, 0.5);
+        }
+        
+        .phase-number {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        
+        .phase-description {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .pulse { animation: pulse 2s ease-in-out infinite; }
+    </style>
+</head>
+<body>
+    <div class="connection-badge" id="connectionBadge">● DISCONNECTED</div>
+    
+    <div class="header">
+        <h1>🚀 RICK BATTLESTATION</h1>
+        <div class="subtitle">Autonomous Trading Command Center - Live Dashboard</div>
+    </div>
+    
+    <div class="dashboard">
+        <!-- Phase Status -->
+        <div class="panel">
+            <div class="panel-title">📍 Current Phase</div>
+            <div class="phase-indicator" id="phaseIndicator">
+                <div class="phase-number">?</div>
+                <div class="phase-description">Initializing...</div>
+            </div>
+        </div>
+        
+        <!-- P&L Summary -->
+        <div class="panel">
+            <div class="panel-title">💰 Performance</div>
+            <div class="big-number stat-value neutral" id="totalPnL">$0.00</div>
+            <div class="stat-row">
+                <span class="stat-label">Current Capital:</span>
+                <span class="stat-value" id="currentCapital">$0.00</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Trades Completed:</span>
+                <span class="stat-value" id="tradesCompleted">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Win Rate:</span>
+                <span class="stat-value" id="winRate">0%</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Profit Factor:</span>
+                <span class="stat-value" id="profitFactor">0.00</span>
+            </div>
+        </div>
+        
+        <!-- Open Positions -->
+        <div class="panel">
+            <div class="panel-title">📊 Open Positions</div>
+            <div id="positionsList" class="position-list">
+                <div style="text-align: center; color: #666; padding: 20px;">
+                    No open positions
+                </div>
+            </div>
+        </div>
+        
+        <!-- System Status -->
+        <div class="panel">
+            <div class="panel-title">⚙️ System Status</div>
+            <div class="stat-row">
+                <span class="stat-label">Entry Gates:</span>
+                <span class="stat-value" id="entryGates">CHECKING</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Guardian Gates:</span>
+                <span class="stat-value" id="guardianGates">CHECKING</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Coinbase:</span>
+                <span class="stat-value" id="coinbaseStatus">CHECKING</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Next Signal Check:</span>
+                <span class="stat-value" id="nextCheck">--</span>
+            </div>
+        </div>
+        
+        <!-- Event Log -->
+        <div class="panel" style="grid-column: 1 / -1;">
+            <div class="panel-title">📋 Event Log</div>
+            <div class="event-log" id="eventLog">
+                <div class="event-item">
+                    <div class="event-time" id="startTime">--:--:--</div>
+                    <div>🚀 Dashboard initialized - waiting for battlestation connection...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // WebSocket connection to battlestation
+        let ws = null;
+        let reconnectAttempts = 0;
+        const MAX_RECONNECT_ATTEMPTS = 10;
+        
+        // Initialize WebSocket connection
+        function connectWebSocket() {
+            try {
+                ws = new WebSocket('ws://localhost:8888');
+                
+                ws.onopen = () => {
+                    console.log('✅ Connected to RICK Battlestation');
+                    updateConnectionStatus(true);
+                    reconnectAttempts = 0;
+                    addEvent('✅ Connected to battlestation WebSocket');
+                };
+                
+                ws.onmessage = (event) => {
+                    try {
+                        const data = JSON.parse(event.data);
+                        handleMessage(data);
+                    } catch (error) {
+                        console.error('Failed to parse message:', error);
+                    }
+                };
+                
+                ws.onclose = () => {
+                    console.log('❌ Disconnected from battlestation');
+                    updateConnectionStatus(false);
+                    
+                    if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+                        reconnectAttempts++;
+                        addEvent(`⚠️ Connection lost - reconnecting (attempt ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})`);
+                        setTimeout(connectWebSocket, 3000);
+                    } else {
+                        addEvent('❌ Failed to reconnect after multiple attempts');
+                    }
+                };
+                
+                ws.onerror = (error) => {
+                    console.error('WebSocket error:', error);
+                    addEvent('⚠️ WebSocket error occurred');
+                };
+                
+            } catch (error) {
+                console.error('Failed to create WebSocket:', error);
+                updateConnectionStatus(false);
+            }
+        }
+        
+        // Handle incoming messages
+        function handleMessage(data) {
+            console.log('Received:', data.type, data);
+            
+            switch (data.type) {
+                case 'status':
+                    updateStatus(data);
+                    break;
+                case 'trade_opened':
+                    handleTradeOpened(data);
+                    break;
+                case 'trade_closed':
+                    handleTradeClosed(data);
+                    break;
+                case 'phase_graduation':
+                    handlePhaseGraduation(data);
+                    break;
+                case 'system_event':
+                    addEvent(data.message);
+                    break;
+            }
+        }
+        
+        // Update status panel
+        function updateStatus(data) {
+            // Phase
+            if (data.phase) {
+                document.getElementById('phaseIndicator').innerHTML = `
+                    <div class="phase-number">${data.phase.current}</div>
+                    <div class="phase-description">${data.phase.name || 'Phase ' + data.phase.current}</div>
+                `;
+            }
+            
+            // Performance
+            if (data.performance) {
+                const perf = data.performance;
+                const pnl = perf.net_profit || 0;
+                
+                document.getElementById('totalPnL').textContent = `$${pnl.toFixed(2)}`;
+                document.getElementById('totalPnL').className = 'big-number stat-value ' + 
+                    (pnl > 0 ? 'positive' : pnl < 0 ? 'negative' : 'neutral');
+                
+                document.getElementById('currentCapital').textContent = `$${(perf.current_capital || 0).toFixed(2)}`;
+                document.getElementById('tradesCompleted').textContent = perf.total_trades || 0;
+                document.getElementById('winRate').textContent = `${(perf.win_rate || 0).toFixed(1)}%`;
+                document.getElementById('profitFactor').textContent = (perf.profit_factor || 0).toFixed(2);
+            }
+            
+            // Positions
+            if (data.positions) {
+                updatePositions(data.positions);
+            }
+            
+            // System status
+            if (data.system) {
+                document.getElementById('entryGates').textContent = data.system.entry_gates || 'ACTIVE';
+                document.getElementById('guardianGates').textContent = data.system.guardian_gates || 'ACTIVE';
+                document.getElementById('coinbaseStatus').textContent = data.system.coinbase || 'CONNECTED';
+                document.getElementById('nextCheck').textContent = data.system.next_check || '--';
+            }
+        }
+        
+        // Update positions list
+        function updatePositions(positions) {
+            const container = document.getElementById('positionsList');
+            
+            if (!positions || positions.length === 0) {
+                container.innerHTML = '<div style="text-align: center; color: #666; padding: 20px;">No open positions</div>';
+                return;
+            }
+            
+            container.innerHTML = positions.map(pos => `
+                <div class="position-item">
+                    <div class="position-header">
+                        <span>${pos.symbol || 'N/A'}</span>
+                        <span class="${pos.unrealized_pnl >= 0 ? 'positive' : 'negative'}">
+                            ${pos.unrealized_pnl >= 0 ? '+' : ''}$${(pos.unrealized_pnl || 0).toFixed(2)}
+                        </span>
+                    </div>
+                    <div class="position-details">
+                        <span>Size: ${pos.size || 0}</span>
+                        <span>Entry: $${(pos.entry_price || 0).toFixed(2)}</span>
+                        <span>Current: $${(pos.current_price || 0).toFixed(2)}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Handle trade opened event
+        function handleTradeOpened(data) {
+            addEvent(`🟢 OPENED: ${data.symbol} - Size: ${data.size} @ $${data.price}`);
+            
+            // Voice narration trigger
+            if (window.speechSynthesis) {
+                const msg = new SpeechSynthesisUtterance(
+                    `Position opened. ${data.symbol}. Size ${data.size}.`
+                );
+                msg.rate = 1.2;
+                msg.pitch = 1.0;
+                window.speechSynthesis.speak(msg);
+            }
+        }
+        
+        // Handle trade closed event
+        function handleTradeClosed(data) {
+            const pnl = data.pnl || 0;
+            const emoji = pnl > 0 ? '✅' : pnl < 0 ? '❌' : '⚪';
+            addEvent(`${emoji} CLOSED: ${data.symbol} - P&L: $${pnl.toFixed(2)}`);
+            
+            // Voice narration
+            if (window.speechSynthesis) {
+                const msg = new SpeechSynthesisUtterance(
+                    `Position closed. ${data.symbol}. ${pnl > 0 ? 'Profit' : 'Loss'} ${Math.abs(pnl).toFixed(0)} dollars.`
+                );
+                msg.rate = 1.2;
+                msg.pitch = pnl > 0 ? 1.2 : 0.8;
+                window.speechSynthesis.speak(msg);
+            }
+        }
+        
+        // Handle phase graduation
+        function handlePhaseGraduation(data) {
+            addEvent(`🎓 GRADUATED TO PHASE ${data.new_phase}! 🚀`);
+            
+            // Voice narration
+            if (window.speechSynthesis) {
+                const msg = new SpeechSynthesisUtterance(
+                    `Congratulations! Graduated to phase ${data.new_phase}.`
+                );
+                msg.rate = 1.0;
+                msg.pitch = 1.3;
+                window.speechSynthesis.speak(msg);
+            }
+        }
+        
+        // Add event to log
+        function addEvent(message) {
+            const log = document.getElementById('eventLog');
+            const time = new Date().toLocaleTimeString();
+            
+            const event = document.createElement('div');
+            event.className = 'event-item';
+            event.innerHTML = `
+                <div class="event-time">${time}</div>
+                <div>${message}</div>
+            `;
+            
+            log.insertBefore(event, log.firstChild);
+            
+            // Keep only last 50 events
+            while (log.children.length > 50) {
+                log.removeChild(log.lastChild);
+            }
+        }
+        
+        // Update connection status
+        function updateConnectionStatus(connected) {
+            const badge = document.getElementById('connectionBadge');
+            badge.textContent = connected ? '● CONNECTED' : '● DISCONNECTED';
+            badge.className = connected ? 'connection-badge connected' : 'connection-badge';
+        }
+        
+        // Initialize
+        document.getElementById('startTime').textContent = new Date().toLocaleTimeString();
+        connectWebSocket();
+        
+        // Update clock
+        setInterval(() => {
+            document.getElementById('startTime').textContent = new Date().toLocaleTimeString();
+        }, 1000);
+    </script>
+</body>
+</html>

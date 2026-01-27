@@ -1,0 +1,42 @@
+{
+  "timestamp": 1769518332.3603208,
+  "oco": {
+    "processed": 0,
+    "ok": 0,
+    "missing": 0,
+    "invalid": 0,
+    "repaired": 0,
+    "flattened": 0,
+    "errors": [],
+    "trades": [],
+    "timestamp": 1769518332.360353
+  },
+  "exit_manager": {
+    "checked": 0,
+    "profit_locks": 0,
+    "trailing_updates": 0,
+    "time_closes": 0,
+    "hard_time_closes": 0,
+    "soft_time_warnings": 0,
+    "profit_giveback_exits": 0,
+    "profit_giveback_tightens": 0,
+    "hedge_opportunities": 0,
+    "hedges_placed": 0,
+    "errors": []
+  },
+  "broker_health": {
+    "healthy": true,
+    "trading_allowed": true,
+    "consecutive_failures": 0,
+    "last_check": null,
+    "last_error": null,
+    "checks": {
+      "auth": null,
+      "pricing": null,
+      "orders": null,
+      "latency_ms": null
+    }
+  },
+  "errors": [],
+  "updated_at": "2026-01-27T12:52:12.865695Z"
+}

@@ -1,0 +1,204 @@
+"""FABIO_AAA_FULL strategy - self-contained, rule-based, tranche OCO strategy
+
+This module implements a hyper-focused, attention-intensive strategy which
+keeps its own indicators, reasoning, charter, and tranche-based stop logic
+entirely self-contained. It returns a TradeCandidate and attaches a
+`tranche_plan` attribute (list of tranche dicts) and `charter`/`reasoning`
+metadata for downstream engines or orchestrators to use when creating OCOs.
+
+The module does NOT depend on other strategy modules and avoids global
+side-effects. Tests exercise the key behaviors (registers, returns candidate,
+provides tranche_plan and stop calculations).
+"""
+from __future__ import annotations
+from typing import Dict, Any, List, Optional
+from ..strategies.base import Strategy, register_strategy
+from ..risk.trade_risk_gate import TradeCandidate
+
+
+@register_strategy('fabio_aaa_full')
+class FabioAAAFull(Strategy):
+    """Hyper-focused rule-based strategy implementing FABIO 'AAA' full method.
+
+    Key features:
+    - Internal RangeBar helper and minimal indicators (EMA, RSI)
+    - Deterministic rule-based entrance logic (momentum + volatility)
+    - Tranche-based OCO plan with partial stops / staged take-profits
+    - Exposes `tranche_plan` and `charter` reasoning on returned TradeCandidate
+    """
+
+    def __init__(self):
+        # Charter describes constraints & required inputs for this strategy
+        self.charter = {
+            'name': 'FABIO_AAA_FULL',
+            'description': 'AAA full: aggressive attention-intensive tranche OCOs with partial stops',
+            'require_full_mode_inputs': True,
+            'risk_profile': 'aggressive'
+        }
+        # Configurable RSI threshold (default 40, optimized from backtest)
+        import os
+        self.rsi_threshold = float(os.getenv('FABIO_RSI_THRESHOLD', '40'))
+        # Configurable stop loss parameters - volatility-adaptive
+        self.stop_min_pct = float(os.getenv('FABIO_STOP_MIN_PCT', '0.01'))  # 1% minimum
+        self.stop_max_pct = float(os.getenv('FABIO_STOP_MAX_PCT', '0.08'))  # 8% maximum
+        self.stop_vol_multiplier = float(os.getenv('FABIO_STOP_VOL_MULT', '3.0'))  # 3x volatility
+
+    # --- Simple internal helpers (self-contained) ---
+    def _ema(self, prices: List[float], span: int) -> Optional[float]:
+        if not prices or span <= 0 or len(prices) < span:
+            return None
+        alpha = 2.0 / (span + 1)
+        ema = prices[0]
+        for p in prices[1:]:
+            ema = alpha * p + (1 - alpha) * ema
+        return ema
+
+    def _rsi(self, prices: List[float], period: int = 14) -> Optional[float]:
+        if len(prices) < period + 1:
+            return None
+        gains = 0.0
+        losses = 0.0
+        for i in range(1, period+1):
+            diff = prices[-i] - prices[-i-1]
+            if diff > 0:
+                gains += diff
+            else:
+                losses += abs(diff)
+        avg_gain = gains / period
+        avg_loss = losses / period
+        if avg_loss == 0:
+            return 100.0
+        rs = avg_gain / avg_loss
+        return 100.0 - (100.0 / (1.0 + rs))
+
+    def _rangebar(self, prices: List[float], tick: float = 0.5) -> List[Dict[str, float]]:
+        """Build a lightweight range-bar sequence; returns list of bars with open/close/high/low"""
+        if not prices:
+            return []
+        bars: List[Dict[str, float]] = []
+        open_p = prices[0]
+        high = open_p
+        low = open_p
+        for p in prices[1:]:
+            high = max(high, p)
+            low = min(low, p)
+            # When range exceeded, close bar and open a new one
+            if high - low >= tick:
+                bars.append({'open': open_p, 'close': p, 'high': high, 'low': low})
+                open_p = p
+                high = p
+                low = p
+        # Append final incomplete bar
+        bars.append({'open': open_p, 'close': prices[-1], 'high': high, 'low': low})
+        return bars
+
+    # --- Decision + tranche builder ---
+    def _evaluate_rules(self, prices: List[float], volumes: Optional[List[float]]=None) -> Optional[Dict[str, Any]]:
+        """Return decision dict when rules match, otherwise None."""
+        if not prices or len(prices) < 20:
+            return None
+        # Indicators
+        ema_fast = self._ema(prices, 5)
+        ema_slow = self._ema(prices, 21)
+        rsi_fast = self._rsi(prices, 7)
+        rsi_slow = self._rsi(prices, 14)
+        if None in (ema_fast, ema_slow, rsi_fast, rsi_slow):
+            return None
+        # Momentum rule: fast EMA above slow EMA and price above EMAs
+        price = prices[-1]
+        if ema_fast <= ema_slow:
+            return None
+        if price <= ema_fast:
+            return None
+        # RSI confirmation: require not deeply oversold (allow strong momentum up to 100)
+        if rsi_slow < self.rsi_threshold:
+            return None
+        # Volume check: optional
+        vol_ok = True
+        if volumes and len(volumes) >= 20:
+            recent_vol = sum(volumes[-5:]) / 5
+            avg_vol = sum(volumes[-20:-5]) / 15
+            vol_ok = recent_vol >= 1.0 * avg_vol
+            if not vol_ok:
+                return None
+        # If we get here, we have a bullish setup
+        # Confidence normalized to 0-1 for selection/logging
+        ema_divergence_pct = (ema_fast - ema_slow) / (ema_slow + 1e-12) * 100  # e.g. 0.5% -> 0.5
+        rsi_boost = max(0, (rsi_slow - 50) / 50 * 0.05)  # up to +5%
+        ema_contrib = min(0.10, ema_divergence_pct * 0.05)  # up to +10%
+
+        raw_confidence = 0.65 + ema_contrib + rsi_boost
+        raw_confidence = max(0.60, min(0.95, raw_confidence))
+        # Temporary cap to keep display sane while debugging
+        confidence = min(0.999, raw_confidence)
+
+        import logging
+        logging.info(
+            "[ABSORB DEBUG] price=%.4f ema_fast=%.4f ema_slow=%.4f ema_divergence_pct=%.4f rsi_fast=%.2f rsi_slow=%.2f ema_contrib=%.4f rsi_boost=%.4f raw_conf=%.4f capped_conf=%.4f",
+            price, ema_fast, ema_slow, ema_divergence_pct, rsi_fast, rsi_slow, ema_contrib, rsi_boost, raw_confidence, confidence
+        )
+
+        return {'side': 'BUY', 'confidence': confidence, 'entry_price': price}
+
+    def _build_tranche_plan(self, entry_price: float, side: str, stop_pct: float) -> List[Dict[str, Any]]:
+        """Create 3-tranche plan with partial stops and incremental profit taking.
+
+        Dictionary per tranche: {"pct_allocation":0.4, "stop":..., "take":..., "note":...}
+        """
+        dir_up = str(side).upper() in ('BUY','LONG')
+        # Tranche allocations (first=45%, second=30%, third=25%)
+        allocations = [0.45, 0.30, 0.25]
+        plan: List[Dict[str, Any]] = []
+        # base stop price
+        if dir_up:
+            base_stop = entry_price * (1 - stop_pct)
+        else:
+            base_stop = entry_price * (1 + stop_pct)
+        # progressive take multipliers
+        takes = [1.3, 2.0, 3.0]
+        for alloc, tmult in zip(allocations, takes):
+            if dir_up:
+                take_price = entry_price * tmult
+            else:
+                take_price = entry_price / tmult
+            # partial stop: after first take, move stop to breakeven for remaining
+            note = 'initial' if alloc == allocations[0] else 'ride and partial lock'
+            plan.append({'pct_allocation': alloc, 'stop_price': base_stop, 'take_price': take_price, 'note': note})
+        return plan
+
+    def generate_candidate(self, market_data: Dict[str, Any]) -> Optional[TradeCandidate]:
+        """Public strategy entry point. Returns TradeCandidate or None."""
+        prices = market_data.get('prices', [])
+        volumes = market_data.get('volumes')
+        instrument = market_data.get('symbol', 'SYM')
+        platform = market_data.get('platform', 'COINBASE')
+
+        decision = self._evaluate_rules(prices, volumes)
+        if not decision:
+            return None
+        side = decision['side']
+        entry_price = decision['entry_price']
+        confidence = decision['confidence']
+
+        # Conservative stop based on local volatility (configurable)
+        bars = self._rangebar(prices, tick=max(0.1, (max(prices)-min(prices))/50.0))
+        vol_proxy = 0.02 if not bars else sum(abs(b['close']-b['open'])/b['open'] for b in bars)/len(bars)
+        stop_pct = max(self.stop_min_pct, min(self.stop_max_pct, vol_proxy * self.stop_vol_multiplier))
+
+        # Build tranche plan
+        tranche_plan = self._build_tranche_plan(entry_price, side, stop_pct)
+
+        # Primary stop for TradeCandidate is the base stop (the most conservative)
+        primary_stop = tranche_plan[0]['stop_price']
+
+        cand = TradeCandidate('fabio_aaa_full', instrument, platform, entry_price, primary_stop, side=side)
+        # Attach strategy-specific metadata (harmless extra attributes)
+        setattr(cand, 'confidence', confidence)  # Add confidence as direct attribute
+        setattr(cand, 'tranche_plan', tranche_plan)
+        setattr(cand, 'charter', self.charter)
+        setattr(cand, 'reasoning', {
+            'confidence': confidence,
+            'rule': 'ema_momentum_rsi_neutral_volume_confirm',
+            'stop_pct': stop_pct
+        })
+        return cand

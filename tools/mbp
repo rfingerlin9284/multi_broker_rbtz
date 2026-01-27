@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+API_URL=${API_URL:-http://localhost:8000}
+
+usage() {
+  cat <<EOF
+Usage: mbp test-order preview|confirm --symbol SYMBOL --entry PRICE --stop PRICE [--mode simulated|platform_paper]
+
+Examples:
+  mbp test-order preview --symbol BTC-USD --entry 50000 --stop 49500
+  mbp test-order confirm --symbol BTC-USD --entry 50000 --stop 49500 --mode simulated
+EOF
+}
+
+if [ $# -lt 1 ]; then
+  usage; exit 1
+fi
+
+cmd=$1; shift
+if [ "$cmd" != "test-order" ]; then
+  echo "Unknown command: $cmd"; usage; exit 1
+fi
+
+action=$1; shift
+SYMBOL=""; ENTRY=""; STOP=""; MODE="simulated"
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --symbol) SYMBOL="$2"; shift 2;;
+    --entry) ENTRY="$2"; shift 2;;
+    --stop) STOP="$2"; shift 2;;
+    --mode) MODE="$2"; shift 2;;
+    -h|--help) usage; exit 0;;
+    *) echo "Unknown arg: $1"; usage; exit 1;;
+  esac
+done
+
+if [ -z "$SYMBOL" ] || [ -z "$ENTRY" ] || [ -z "$STOP" ]; then
+  echo "symbol, entry and stop are required"; usage; exit 1
+fi
+
+if [ "$action" = "preview" ]; then
+  curl -s -X POST "$API_URL/actions/test-order/preview" -H "Content-Type: application/json" -d '{"candidate": {"symbol":"'" -d '"platform": "COINBASE"' -d '"entry_price": '"$ENTRY"' -d '"stop_loss": '"$STOP"' } }' | jq '.'
+  exit 0
+fi
+
+if [ "$action" = "confirm" ]; then
+  curl -s -X POST "$API_URL/actions/test-order/confirm" -H "Content-Type: application/json" -d '{"candidate": {"symbol":"'" -d '"platform": "COINBASE"' -d '"entry_price": '"$ENTRY"' -d '"stop_loss": '"$STOP"' }, "mode": "'"$MODE"'" }' | jq '.'
+  exit 0
+fi
+
+echo "Unknown action: $action"; exit 1
