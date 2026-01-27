@@ -89,25 +89,19 @@ Should this trade be taken? Analyze and respond with JSON only."""
             remaining = int(self._openai_blocked_until - time.time())
             print(f"   ⏳ OpenAI: rate-limited ({remaining}s remaining)")
         
-        # 4. DeepSeek fallback when Grok/OpenAI fail but we still have credentials
+        # 4. Try live DeepSeek provider when Grok/OpenAI fail (no simulation allowed)
         if self.deepseek_key and not votes:
-            vote = self._simulate_deepseek_vote(direction, price, prices)
+            vote = self._query_deepseek_live(prompt)
             if vote:
                 votes.append(vote)
-                print(f"   ✅ DeepSeek fallback: {vote.signal.upper()} ({vote.confidence:.0%})")
+                print(f"   • DEEPSEEK (live) says: {vote.signal.upper()} ({vote.confidence:.0%})")
         elif not self.deepseek_key and not votes:
             print("   ⚠️  DeepSeek fallback unavailable (DEEPSEEK_API_KEY missing)")
 
-        # 5. DeepSeek preference + MultiIndicator augmentation
-        # Prefer DeepSeek fallback when Grok/OpenAI are unavailable. Additionally
-        # compute a MultiIndicator consensus (momentum + SMA + volatility) to
-        # augment votes. MultiIndicator helps the decision but will not override
-        # a VETO and will not auto-approve unless its confidence exceeds 0.60.
-        if not votes and self.deepseek_key:
-            vote = self._simulate_deepseek_vote(direction, price, prices)
-            if vote:
-                votes.append(vote)
-                print(f"   ✅ DeepSeek fallback: {vote.signal.upper()} ({vote.confidence:.0%})")
+        # 5. Prefer live DeepSeek when available; do NOT simulate votes.
+        # MultiIndicator augmentation still applies but will not override vetos
+        # or be considered a 'real' AI seat for approval decisions.
+        # (No automatic simulated DeepSeek votes will be used.)
 
         # Always compute MultiIndicator vote to augment AI votes when possible.
         try:
@@ -345,34 +339,24 @@ Should this trade be taken? Analyze and respond with JSON only."""
             print(f"   ❌ _multi_indicator_vote error: {e}")
             return None
 
-    def _simulate_deepseek_vote(self, direction: str, price: float, prices: list) -> Optional[AIVote]:
-        """Produce a DeepSeek vote when the live provider currently cannot answer."""
-        signal = 'neutral'
-        if direction:
-            norm = direction.lower()
-            if 'buy' in norm:
-                signal = 'buy'
-            elif 'sell' in norm:
-                signal = 'sell'
-
-        confidence = 0.65
-        reasoning = f"DeepSeek fallback aligned with requested {signal.upper()} direction."
-        if prices:
-            trend = prices[-1] - prices[0]
-            if signal == 'buy' and trend < 0:
-                confidence -= 0.2
-                reasoning += " Price is drifting lower, leaning cautious."
-            if signal == 'sell' and trend > 0:
-                confidence -= 0.2
-                reasoning += " Price is drifting higher, leaning cautious."
-
-        confidence = max(0.4, min(confidence, 0.9))
-        return AIVote(
-            ai_name='DeepSeek',
-            signal=signal,
-            confidence=confidence,
-            reasoning=reasoning
-        )
+    def _query_deepseek_live(self, prompt: str) -> Optional[AIVote]:
+        """Query the live DeepSeek provider and parse response into an AIVote.
+        Returns None if DeepSeek is not enabled or fails to provide a valid vote."""
+        try:
+            from ai_router.providers.deepseek_provider import DeepSeekProvider
+            prov = DeepSeekProvider()
+            if not prov.enabled():
+                print("   • DEEPSEEK (live): no API key configured")
+                return None
+            res = prov.generate(prompt, system_prompt=self.system_prompt)
+            if not res.get('ok'):
+                print(f"   • DEEPSEEK (live) error: {res.get('error')}")
+                return None
+            content = res.get('response', '')
+            return self._parse_response(content, 'DeepSeek')
+        except Exception as e:
+            print(f"   ❌ DeepSeek live query failed: {e}")
+            return None
 
 
 # Global instance

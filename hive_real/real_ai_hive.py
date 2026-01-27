@@ -71,22 +71,17 @@ class RealAIHive:
         except Exception:
             pass
 
-        # If no real AI responses, attempt DeepSeek-sim fallback (prefer DeepSeek over heuristic)
+        # If no real AI responses, attempt live DeepSeek (do NOT simulate)
         if not votes:
             try:
-                # Prefer DeepSeek endpoint if available
                 ds = self._query_deepseek(prompts[-1]['prompt'])
                 if ds:
                     print(f"   ✅ DeepSeek LIVE: {ds.get('signal','neutral').upper()} ({float(ds.get('confidence',0.3)):.0%})")
                     votes.append(AIVote(ai_name='DeepSeek', agent_role='Sentinel', signal=ds.get('signal','neutral'), confidence=float(ds.get('confidence',0.3)), reasoning=ds.get('reasoning',''), timestamp=datetime.now().isoformat()))
                 else:
-                    # Simulate DeepSeek vote as a fallback (momentum-based, labeled DeepSeekSim)
-                    ds_sim = self._simulate_deepseek_vote(direction, entry_price, market_data.get('prices', []))
-                    if ds_sim:
-                        print(f"   ✅ DeepSeekSim fallback: {ds_sim.signal.upper()} ({ds_sim.confidence:.0%})")
-                        votes.append(AIVote(ai_name='DeepSeekSim', agent_role='Sentinel', signal=ds_sim.signal, confidence=ds_sim.confidence, reasoning=ds_sim.reasoning, timestamp=datetime.now().isoformat()))
+                    print("   • DeepSeek live not available; no simulated fallback will be used")
             except Exception as e:
-                print(f"   ⚠️ DeepSeek fallback error: {e}")
+                print(f"   ⚠️ DeepSeek live query error: {e}")
 
         # Always compute MultiIndicator vote to augment AI votes when possible
         try:
