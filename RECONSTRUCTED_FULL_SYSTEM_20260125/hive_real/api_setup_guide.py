@@ -1,0 +1,82 @@
+#!/usr/bin/env python3
+"""
+API KEY SETUP GUIDE
+How to get API keys from your existing business accounts
+"""
+
+def show_api_setup_guide():
+    print("🔑 API KEY SETUP GUIDE")
+    print("=" * 50)
+    print()
+    
+    print("1️⃣  CHATGPT BUSINESS API KEY")
+    print("-" * 30)
+    print("You already have a ChatGPT business account. To get API access:")
+    print()
+    print("   🌐 Go to: https://platform.openai.com/api-keys")
+    print("   🏢 Log in with your business account")
+    print("   ➕ Click 'Create new secret key'")
+    print("   📝 Name it: 'RICK_TRADING_HIVE'")
+    print("   💰 Cost: ~$0.03 per analysis (very cheap)")
+    print()
+    print("   Then set in WSL:")
+    print("   export OPENAI_API_KEY='sk-your-key-here'")
+    print()
+    
+    print("2️⃣  GROK (X.AI) API KEY")
+    print("-" * 30)
+    print("Grok is newer, API access may be limited:")
+    print()
+    print("   🌐 Go to: https://x.ai/api (if available)")
+    print("   🏢 Use your X/Twitter account linked to Grok")
+    print("   ➕ Request API access")
+    print("   💰 Pricing not yet public")
+    print()
+    print("   Alternative: Browser automation (what we tried)")
+    print()
+    
+    print("3️⃣  DEEPSEEK API KEY")
+    print("-" * 30)
+    print("DeepSeek offers API access:")
+    print()
+    print("   🌐 Go to: https://platform.deepseek.com/api_keys")
+    print("   🏢 Create account or use existing")
+    print("   ➕ Generate API key")
+    print("   💰 Very affordable (~$0.001 per analysis)")
+    print()
+    print("   Then set:")
+    print("   export DEEPSEEK_API_KEY='your-key-here'")
+    print()
+    
+    print("4️⃣  CLAUDE API KEY (Alternative)")
+    print("-" * 30)
+    print("As backup, Anthropic Claude:")
+    print()
+    print("   🌐 Go to: https://console.anthropic.com/")
+    print("   🏢 Create account")
+    print("   💳 Add payment method")
+    print("   ➕ Generate API key")
+    print("   💰 ~$0.015 per analysis")
+    print()
+    print("   Then set:")
+    print("   export ANTHROPIC_API_KEY='your-key-here'")
+    print()
+    
+    print("🎯 RECOMMENDED QUICK START:")
+    print("=" * 30)
+    print("1. Start with OpenAI (your existing business account)")
+    print("2. Add Claude as backup")
+    print("3. Add DeepSeek for cost efficiency")
+    print("4. Grok when API becomes available")
+    print()
+    
+    print("💡 COST ESTIMATE:")
+    print("   - 100 trade analyses per day")
+    print("   - OpenAI: ~$3/day")
+    print("   - Claude: ~$1.50/day") 
+    print("   - DeepSeek: ~$0.10/day")
+    print("   - Total: ~$5/day for REAL AI analysis")
+    print("   - ROI: Pays for itself with ONE good trade")
+
+if __name__ == "__main__":
+    show_api_setup_guide()
