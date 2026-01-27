@@ -1,0 +1,90 @@
+#!/usr/bin/env bash
+# INSTALL SYSTEMD UNITS — Sets up RBOTzilla as system services (survives reboots)
+# Usage: ./tools/install_systemd_units.sh
+
+set -euo pipefail
+
+SCRIPT_PATH="$(readlink -f "${BASH_SOURCE[0]}")"
+REPO_ROOT="$(cd "$(dirname "$SCRIPT_PATH")/.." && pwd)"
+cd "$REPO_ROOT"
+
+UNIT_DIR="ops/systemd"
+SYSTEMD_DIR="/etc/systemd/system"
+
+echo "🔧 Installing RBOTzilla systemd units"
+echo ""
+
+# Check if running as root or with sudo
+if [[ $EUID -ne 0 ]]; then
+    echo "⚠️  This script requires sudo privileges to install systemd units."
+    echo "   Re-running with sudo..."
+    exec sudo bash "$0" "$@"
+fi
+
+# Verify unit files exist
+if [[ ! -f "$UNIT_DIR/rbotzilla-orchestrator.service" ]]; then
+    echo "❌ ERROR: $UNIT_DIR/rbotzilla-orchestrator.service not found"
+    exit 1
+fi
+
+if [[ ! -f "$UNIT_DIR/rbotzilla-oanda.service" ]]; then
+    echo "❌ ERROR: $UNIT_DIR/rbotzilla-oanda.service not found"
+    exit 1
+fi
+
+# Stop existing services if running
+echo "🛑 Stopping existing services (if any)..."
+systemctl stop rbotzilla-oanda.service 2>/dev/null || true
+systemctl stop rbotzilla-orchestrator.service 2>/dev/null || true
+
+# Install units
+echo "📦 Installing systemd units..."
+cp "$UNIT_DIR/rbotzilla-orchestrator.service" "$SYSTEMD_DIR/"
+cp "$UNIT_DIR/rbotzilla-oanda.service" "$SYSTEMD_DIR/"
+
+echo "  ✓ Copied rbotzilla-orchestrator.service → $SYSTEMD_DIR/"
+echo "  ✓ Copied rbotzilla-oanda.service → $SYSTEMD_DIR/"
+
+# Reload systemd daemon
+echo "🔄 Reloading systemd daemon..."
+systemctl daemon-reload
+
+# Enable services (start on boot)
+echo "⚙️  Enabling services..."
+systemctl enable rbotzilla-orchestrator.service
+systemctl enable rbotzilla-oanda.service
+
+echo "  ✓ Enabled rbotzilla-orchestrator (starts on boot)"
+echo "  ✓ Enabled rbotzilla-oanda (starts on boot)"
+
+echo ""
+echo "✅ INSTALLATION COMPLETE"
+echo ""
+echo "📋 Service Management Commands:"
+echo ""
+echo "  # Start services"
+echo "  sudo systemctl start rbotzilla-orchestrator"
+echo "  sudo systemctl start rbotzilla-oanda"
+echo ""
+echo "  # Check status"
+echo "  systemctl status rbotzilla-orchestrator"
+echo "  systemctl status rbotzilla-oanda"
+echo ""
+echo "  # View logs"
+echo "  journalctl -u rbotzilla-orchestrator -f"
+echo "  journalctl -u rbotzilla-oanda -f"
+echo ""
+echo "  # Stop services"
+echo "  sudo systemctl stop rbotzilla-oanda"
+echo "  sudo systemctl stop rbotzilla-orchestrator"
+echo ""
+echo "  # Disable (prevent auto-start on boot)"
+echo "  sudo systemctl disable rbotzilla-oanda"
+echo "  sudo systemctl disable rbotzilla-orchestrator"
+echo ""
+echo "⚠️  IMPORTANT: Services are enabled but NOT started yet."
+echo "   To start now, run:"
+echo ""
+echo "   sudo systemctl start rbotzilla-orchestrator"
+echo "   sudo systemctl start rbotzilla-oanda"
+echo ""

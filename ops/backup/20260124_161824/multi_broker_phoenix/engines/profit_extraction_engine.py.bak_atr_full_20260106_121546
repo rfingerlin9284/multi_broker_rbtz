@@ -1,0 +1,272 @@
+#!/usr/bin/env python3
+"""
+PROFIT EXTRACTION ENGINE
+Automatic profit-taking, trailing stops, and position management
+Built into the EXTREME SYSTEMS as the missing EXIT LOGIC
+"""
+from typing import Dict, Any, Optional
+from dataclasses import dataclass
+from datetime import datetime
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+@dataclass
+class TradePosition:
+    """Track an open trade's performance"""
+    trade_id: str
+    symbol: str
+    entry_price: float
+    entry_time: datetime
+    entry_size: float
+    current_price: float
+    current_pnl: float
+    current_pnl_pct: float
+    bars_held: int
+    max_profit_seen: float
+    signal_strength: float  # Original signal that opened it
+    
+
+class ProfitExtractionEngine:
+    """
+    Automatic profit-taking and exit management for the EXTREME SYSTEMS
+    
+    Exit Triggers:
+    1. PROFIT TARGETS: Fixed % gain (e.g., +2% = auto-close 50%, +5% = close rest)
+    2. TRAILING STOPS: Lock in gains once +1% profit appears
+    3. TIME STOPS: Close after N bars if still flat/small profit
+    4. SIGNAL FADE: Close if signal quality degrades >30%
+    5. RISK MANAGEMENT: Emergency exit on -2% loss or 10+ bars stagnant
+    """
+    
+    def __init__(self,
+                 profit_target_1: float = 0.015,  # 1.5% = take 50% profit
+                 profit_target_2: float = 0.03,   # 3.0% = take remaining
+                 trail_activation: float = 0.01,  # Activate trail at +1%
+                 trail_distance: float = 0.005,   # Trail by 0.5%
+                 max_hold_bars: int = 50,         # Close if held >50 bars
+                 stagnant_bars: int = 10,         # Close if 10 bars no movement
+                 min_profit_to_hold: float = 0.001,  # Hold if >0.1% profit
+                 signal_fade_threshold: float = 0.3):  # Close if signal fades >30%
+        """
+        Args:
+            profit_target_1: First profit-taking level
+            profit_target_2: Second profit-taking level  
+            trail_activation: Price movement to activate trailing stop
+            trail_distance: Distance to trail stop
+            max_hold_bars: Maximum bars to hold a trade
+            stagnant_bars: Bars without movement = close
+            min_profit_to_hold: Min profit before we consider holding
+            signal_fade_threshold: How much signal can fade before exit
+        """
+        self.profit_target_1 = profit_target_1
+        self.profit_target_2 = profit_target_2
+        self.trail_activation = trail_activation
+        self.trail_distance = trail_distance
+        self.max_hold_bars = max_hold_bars
+        self.stagnant_bars = stagnant_bars
+        self.min_profit_to_hold = min_profit_to_hold
+        self.signal_fade_threshold = signal_fade_threshold
+        
+        self.active_trades: Dict[str, TradePosition] = {}
+        self.closed_trades = 0
+        self.total_profit_realized = 0.0
+        
+        logger.info("💰 PROFIT EXTRACTION ENGINE ACTIVATED")
+        logger.info(f"   Profit Target 1: {profit_target_1*100:.1f}%")
+        logger.info(f"   Profit Target 2: {profit_target_2*100:.1f}%")
+        logger.info(f"   Trailing Stop: +{trail_activation*100:.1f}% triggers -{trail_distance*100:.1f}% trail")
+        logger.info(f"   Max Hold: {max_hold_bars} bars")
+        logger.info(f"   Stagnant: Close after {stagnant_bars} bars no movement")
+    
+    def add_trade(self, trade_id: str, symbol: str, entry_price: float, 
+                  entry_size: float, signal_strength: float):
+        """Register a new open trade"""
+        self.active_trades[trade_id] = TradePosition(
+            trade_id=trade_id,
+            symbol=symbol,
+            entry_price=entry_price,
+            entry_time=datetime.utcnow(),
+            entry_size=entry_size,
+            current_price=entry_price,
+            current_pnl=0.0,
+            current_pnl_pct=0.0,
+            bars_held=0,
+            max_profit_seen=0.0,
+            signal_strength=signal_strength
+        )
+        logger.debug(f"📊 Tracking: {trade_id} {symbol} @ ${entry_price:.2f}")
+    
+    def update_trade(self, trade_id: str, current_price: float, 
+                     signal_strength: Optional[float] = None):
+        """Update trade with latest price and optionally new signal strength"""
+        if trade_id not in self.active_trades:
+            return None
+        
+        trade = self.active_trades[trade_id]
+        trade.current_price = current_price
+        trade.bars_held += 1
+        
+        # Update P/L
+        price_move = current_price - trade.entry_price
+        trade.current_pnl = price_move * trade.entry_size / trade.entry_price
+        trade.current_pnl_pct = (current_price - trade.entry_price) / trade.entry_price
+        
+        # Track max profit seen
+        if trade.current_pnl > trade.max_profit_seen:
+            trade.max_profit_seen = trade.current_pnl
+        
+        # Update signal if provided
+        if signal_strength is not None:
+            trade.signal_strength = signal_strength
+        
+        return trade
+    
+    def get_exit_signal(self, trade_id: str, 
+                       current_signal_strength: Optional[float] = None) -> Optional[Dict[str, Any]]:
+        """
+        Check if a trade should be exited
+        
+        Returns:
+            {
+                'should_exit': bool,
+                'exit_reason': str,
+                'exit_price': float,
+                'exit_size': float,  # What % of position to close
+                'expected_pnl': float
+            }
+        """
+        if trade_id not in self.active_trades:
+            return None
+        
+        trade = self.active_trades[trade_id]
+        
+        # 1. CHECK PROFIT TARGETS (take some/all off table)
+        if trade.current_pnl_pct >= self.profit_target_2:
+            # Hit profit target 2 - CLOSE ALL
+            return {
+                'should_exit': True,
+                'exit_reason': f"🎯 Profit Target 2: {trade.current_pnl_pct*100:.2f}%",
+                'exit_price': trade.current_price,
+                'exit_size': 1.0,  # Close 100%
+                'expected_pnl': trade.current_pnl
+            }
+        
+        if trade.current_pnl_pct >= self.profit_target_1:
+            # Hit profit target 1 - CLOSE 50% (scale out)
+            return {
+                'should_exit': True,
+                'exit_reason': f"🎯 Profit Target 1: {trade.current_pnl_pct*100:.2f}%",
+                'exit_price': trade.current_price,
+                'exit_size': 0.5,  # Close 50%
+                'expected_pnl': trade.current_pnl * 0.5
+            }
+        
+        # 2. CHECK TRAILING STOP (lock in gains once +1%)
+        if trade.current_pnl_pct >= self.trail_activation and trade.max_profit_seen > 0:
+            # We've seen profit and it's starting to pullback
+            drawdown_from_peak = trade.max_profit_seen - trade.current_pnl
+            if drawdown_from_peak >= self.trail_distance:
+                return {
+                    'should_exit': True,
+                    'exit_reason': f"🛑 Trailing Stop: {trade.current_pnl_pct*100:.2f}% (peaked at {trade.max_profit_seen*100:.2f}%)",
+                    'exit_price': trade.current_price,
+                    'exit_size': 1.0,
+                    'expected_pnl': trade.current_pnl
+                }
+        
+        # 3. CHECK TIME STOP (close if held too long)
+        if trade.bars_held >= self.max_hold_bars:
+            return {
+                'should_exit': True,
+                'exit_reason': f"⏰ Max Hold Time: {trade.bars_held} bars",
+                'exit_price': trade.current_price,
+                'exit_size': 1.0,
+                'expected_pnl': trade.current_pnl
+            }
+        
+        # 4. CHECK SIGNAL FADE (exit if original signal loses confidence)
+        if current_signal_strength is not None:
+            signal_fade = (trade.signal_strength - current_signal_strength) / trade.signal_strength
+            if signal_fade > self.signal_fade_threshold and trade.current_pnl_pct < self.min_profit_to_hold:
+                return {
+                    'should_exit': True,
+                    'exit_reason': f"⚠️  Signal Fade: {signal_fade*100:.1f}% degradation",
+                    'exit_price': trade.current_price,
+                    'exit_size': 1.0,
+                    'expected_pnl': trade.current_pnl
+                }
+        
+        # 5. EMERGENCY EXITS
+        if trade.current_pnl_pct <= -0.02:  # -2% loss
+            return {
+                'should_exit': True,
+                'exit_reason': f"🚨 Emergency: {trade.current_pnl_pct*100:.2f}% loss",
+                'exit_price': trade.current_price,
+                'exit_size': 1.0,
+                'expected_pnl': trade.current_pnl
+            }
+        
+        # No exit signal
+        return None
+    
+    def close_trade(self, trade_id: str, exit_price: float, 
+                   exit_size: float = 1.0) -> Dict[str, Any]:
+        """
+        Close a trade or partial position
+        
+        Args:
+            trade_id: Trade to close
+            exit_price: Price to close at
+            exit_size: % of position to close (0.5 = 50%, 1.0 = 100%)
+        
+        Returns:
+            Closed trade details
+        """
+        if trade_id not in self.active_trades:
+            return {'error': 'Trade not found'}
+        
+        trade = self.active_trades[trade_id]
+        
+        # Calculate realized P/L
+        realized_pnl = (exit_price - trade.entry_price) * trade.entry_size * exit_size / trade.entry_price
+        realized_pct = (exit_price - trade.entry_price) / trade.entry_price
+        
+        self.closed_trades += 1
+        self.total_profit_realized += realized_pnl
+        
+        result = {
+            'trade_id': trade_id,
+            'symbol': trade.symbol,
+            'bars_held': trade.bars_held,
+            'entry_price': trade.entry_price,
+            'exit_price': exit_price,
+            'exit_size_pct': exit_size * 100,
+            'realized_pnl': realized_pnl,
+            'realized_pct': realized_pct * 100,
+            'max_profit_seen': trade.max_profit_seen
+        }
+        
+        # Remove if fully closed
+        if exit_size >= 0.99:
+            del self.active_trades[trade_id]
+        else:
+            # Partial close - adjust position
+            trade.entry_size *= (1 - exit_size)
+        
+        return result
+    
+    def get_portfolio_summary(self) -> Dict[str, Any]:
+        """Get summary of all open trades"""
+        total_unrealized = sum(t.current_pnl for t in self.active_trades.values())
+        profitable = sum(1 for t in self.active_trades.values() if t.current_pnl > 0)
+        
+        return {
+            'open_trades': len(self.active_trades),
+            'total_unrealized': total_unrealized,
+            'profitable_trades': profitable,
+            'total_closed': self.closed_trades,
+            'total_realized': self.total_profit_realized,
+            'avg_bars_held': sum(t.bars_held for t in self.active_trades.values()) / max(len(self.active_trades), 1)
+        }

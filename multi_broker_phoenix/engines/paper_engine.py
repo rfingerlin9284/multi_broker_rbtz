@@ -1,0 +1,260 @@
+"""Paper trading engine: executes paper trades against live/replayed prices
+and persists a trade ledger to SQLite.
+"""
+from __future__ import annotations
+import os
+import sqlite3
+from dataclasses import dataclass
+from datetime import datetime
+from typing import Any, Dict
+
+
+@dataclass
+class PaperOrder:
+    id: str
+    platform: str
+    strategy_id: str
+    symbol: str
+    side: str
+    entry: float
+    fill_price: float
+    stop: float
+    size: float
+    fees: float
+    status: str
+    ts: str
+    execution_type: str
+
+
+class PaperEngine:
+    def __init__(
+        self,
+        db_path: str = 'data/paper_ledger.sqlite',
+        platform: str = 'OANDA',
+        fee_pct: float = 0.001,
+        slippage_pct: float = 0.001,
+        initial_equity: float = 100000.0,
+    ):
+        self.platform = platform
+        self.db_path = db_path
+        self.fee_pct = float(fee_pct)
+        self.slippage_pct = float(slippage_pct)
+        self._next_id = 1
+        # For in-memory sqlite, use a persistent connection so tables persist across calls
+        self._conn = None
+        if self.db_path == ':memory:':
+            self._conn = sqlite3.connect(self.db_path, check_same_thread=False)
+        else:
+            os.makedirs(os.path.dirname(self.db_path) or '.', exist_ok=True)
+        self._ensure_db()
+        self.initial_equity = float(initial_equity)
+
+    def _get_conn(self):
+        if self._conn is not None:
+            return self._conn
+        return sqlite3.connect(self.db_path)
+
+    def _ensure_db(self):
+        conn = self._get_conn()
+        cur = conn.cursor()
+        cur.execute(
+            """CREATE TABLE IF NOT EXISTS trades (
+                id TEXT PRIMARY KEY,
+                ts TEXT,
+                platform TEXT,
+                strategy_id TEXT,
+                symbol TEXT,
+                side TEXT,
+                entry REAL,
+                fill_price REAL,
+                stop REAL,
+                size REAL,
+                fees REAL,
+                status TEXT,
+                execution_type TEXT
+            )"""
+        )
+        conn.commit()
+        # Only close the connection if it's not the persistent in-memory connection
+        if self._conn is None:
+            conn.close()
+
+    def place_order(self, candidate: Any, size: float, execution_type: str = 'SIMULATED') -> Dict[str, Any]:
+        """Place a simulated (paper) order with position-awareness.
+
+        Behavior changes for simulation (mirrors OANDA connector behavior):
+        - Skip duplicate entries on same instrument & direction
+        - Optionally reverse an opposite-direction trade by closing it first
+        - Applies tight initial stop if candidate.stop_loss is provided; otherwise uses candidate.stop or 0.0
+        """
+        # Configurable behavior
+        # === POSITION AWARENESS & REVERSAL LOGIC ===
+        allow_reversal = os.getenv('OANDA_ALLOW_REVERSAL_ON_OPPOSITE_SIGNAL', os.getenv('OANDA_ALLOW_REVERSAL', 'true')).lower() in (
+            '1', 'true', 'yes'
+        )
+        reversal_min_conf = float(os.getenv('OANDA_REVERSAL_MIN_CONFIDENCE', '0.75'))
+        conf_threshold = float(os.getenv('OANDA_SIGNAL_CONFIDENCE_THRESHOLD', '0.70'))
+        symbol = getattr(candidate, 'symbol', None)
+        side = getattr(candidate, 'side', None)
+        confidence = getattr(candidate, 'confidence', None)
+
+        # Confidence filter
+        if confidence is not None and float(confidence) < conf_threshold:
+            logger = __import__('logging').getLogger(__name__)
+            logger.info('Skipping simulated order for %s: confidence %.3f < threshold %.3f', symbol, float(confidence), conf_threshold)
+            return {'status': 'SKIPPED', 'reason': 'low_confidence', 'confidence': confidence}
+
+        conn = self._get_conn()
+        cur = conn.cursor()
+        # find existing open trades on same symbol
+        cur.execute("SELECT id, side FROM trades WHERE symbol=? AND status='FILLED'", (symbol,))
+        rows = cur.fetchall()
+        existing = rows[0] if rows else None
+        if existing:
+            existing_id, existing_side = existing[0], existing[1]
+            if existing_side == side:
+                # duplicate direction -> skip
+                logger = __import__('logging').getLogger(__name__)
+                logger.info('Skipping duplicate simulated entry - already positioned %s on %s', existing_side, symbol)
+                if self._conn is None:
+                    conn.close()
+                return {'status': 'SKIPPED', 'reason': 'duplicate_position', 'existing_trade_id': existing_id}
+
+            # opposite side exists, consider reversal
+            if not allow_reversal:
+                logger = __import__('logging').getLogger(__name__)
+                logger.info('Opposite simulated position exists on %s but reversal disabled; skipping', symbol)
+                if self._conn is None:
+                    conn.close()
+                return {'status': 'SKIPPED', 'reason': 'opposite_exists_no_reversal', 'existing_trade_id': existing_id}
+
+            # Check reversal confidence
+            if confidence is None or float(confidence) < reversal_min_conf:
+                logger = __import__('logging').getLogger(__name__)
+                logger.info(
+                    'Opposite simulated signal too weak (confidence %s < %s); skipping reversal on %s',
+                    confidence,
+                    reversal_min_conf,
+                    symbol,
+                )
+                if self._conn is None:
+                    conn.close()
+                return {'status': 'SKIPPED', 'reason': 'opposite_signal_too_weak', 'confidence': confidence}
+
+            # close existing simulated trade
+            cur.execute("DELETE FROM trades WHERE id=?", (existing_id,))
+            conn.commit()
+            logger = __import__('logging').getLogger(__name__)
+            logger.info('Reversing simulated position on %s: closed %s', symbol, existing_id)
+
+        # proceed to create the new simulated trade (same as before)
+        oid = f"PAPER-{self._next_id}"
+        self._next_id += 1
+        entry = float(getattr(candidate, 'entry_price', getattr(candidate, 'entry', 0.0)))
+        side = getattr(candidate, 'side', None)
+        stop = float(getattr(candidate, 'stop_loss', getattr(candidate, 'stop', 0.0)))
+        fill_price = entry
+        if side == 'BUY':
+            fill_price = entry * (1.0 + self.slippage_pct)
+        elif side == 'SELL':
+            fill_price = entry * (1.0 - self.slippage_pct)
+        fees = abs(fill_price * float(size) * self.fee_pct)
+        ts = datetime.utcnow().isoformat()
+        order = PaperOrder(
+            id=oid,
+            platform=self.platform,
+            strategy_id=getattr(candidate, 'strategy_id', getattr(candidate, 'strategy', None)),
+            symbol=getattr(candidate, 'symbol', None),
+            side=side,
+            entry=entry,
+            fill_price=fill_price,
+            stop=stop,
+            size=size,
+            fees=fees,
+            status='FILLED',
+            ts=ts,
+            execution_type=execution_type,
+        )
+        cur.execute(
+            "INSERT INTO trades (id, ts, platform, strategy_id, symbol, side, entry, fill_price, stop, size, fees, status, execution_type) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+            (
+                order.id,
+                order.ts,
+                order.platform,
+                order.strategy_id,
+                order.symbol,
+                order.side,
+                order.entry,
+                order.fill_price,
+                order.stop,
+                order.size,
+                order.fees,
+                order.status,
+                order.execution_type,
+            ),
+        )
+        conn.commit()
+        # write audit entry for this trade
+        try:
+            self._record_audit({'id': f"AUDIT-{order.id}", 'ts': order.ts, 'type': 'trade', 'payload': order.__dict__})
+        except Exception:
+            pass
+        if self._conn is None:
+            conn.close()
+        return order.__dict__
+
+    def _record_audit(self, obj: Dict[str, Any]):
+        conn = self._get_conn()
+        cur = conn.cursor()
+        try:
+            cur.execute("CREATE TABLE IF NOT EXISTS audit (id TEXT PRIMARY KEY, ts TEXT, type TEXT, payload TEXT)")
+            import json
+            cur.execute(
+                "INSERT OR REPLACE INTO audit (id, ts, type, payload) VALUES (?,?,?,?)",
+                (obj.get('id'), obj.get('ts'), obj.get('type'), json.dumps(obj.get('payload'))),
+            )
+            conn.commit()
+        finally:
+            if self._conn is None:
+                conn.close()
+
+    def list_trades(self):
+        conn = self._get_conn()
+        cur = conn.cursor()
+        cur.execute(
+            "SELECT id, ts, platform, strategy_id, symbol, side, entry, fill_price, stop, size, fees, status, execution_type FROM trades ORDER BY ts ASC"
+        )
+        rows = cur.fetchall()
+        # only close if not using persistent in-memory connection
+        if self._conn is None:
+            conn.close()
+        return [
+            dict(
+                zip(
+                    [
+                        "id",
+                        "ts",
+                        "platform",
+                        "strategy_id",
+                        "symbol",
+                        "side",
+                        "entry",
+                        "fill_price",
+                        "stop",
+                        "size",
+                        "fees",
+                        "status",
+                        "execution_type",
+                    ],
+                    r,
+                )
+            )
+            for r in rows
+        ]
+
+    def clear_trades(self):
+        conn = self._get_conn()
+        cur = conn.cursor()
+        cur.execute("DELETE FROM trades")
+        conn.commit()
+        conn.close()

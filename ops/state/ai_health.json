@@ -1,0 +1,35 @@
+{
+  "ai_ok": true,
+  "local_ok": true,
+  "cloud_ok": true,
+  "chosen": "ollama",
+  "healthy_count": 2,
+  "min_seats": 1,
+  "snapshot": {
+    "ollama": {
+      "ok": true,
+      "code": 200,
+      "reason": "OK",
+      "latency_ms": 1,
+      "model": "llama3.1:8b",
+      "url": "http://127.0.0.1:11434",
+      "models": [
+        "codellama:13b-instruct",
+        "llama3.1:8b"
+      ],
+      "timestamp": 1769527115.5037396
+    },
+    "grok": {
+      "ok": true,
+      "code": 200,
+      "reason": "OK",
+      "latency_ms": 1494
+    },
+    "deepseek": {
+      "ok": false,
+      "code": 401,
+      "reason": "HTTP_401",
+      "latency_ms": 2508
+    }
+  }
+}

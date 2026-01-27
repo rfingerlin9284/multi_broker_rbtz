@@ -1,0 +1,5 @@
+{
+  "error": "NO_POSITION_API",
+  "error_detail": "Connector 'unknown' lacks get_positions() and get_open_trades(). Cannot retrieve positions for exit management.",
+  "timestamp": "2026-01-27T06:50:37.374975Z"
+}

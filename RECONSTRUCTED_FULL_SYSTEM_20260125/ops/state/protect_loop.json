@@ -1,0 +1,44 @@
+{
+  "timestamp": 1769477316.333994,
+  "oco": null,
+  "exit_manager": {
+    "checked": 0,
+    "profit_locks": 0,
+    "trailing_updates": 0,
+    "time_closes": 0,
+    "hard_time_closes": 0,
+    "soft_time_warnings": 0,
+    "profit_giveback_exits": 0,
+    "profit_giveback_tightens": 0,
+    "errors": []
+  },
+  "broker_health": {
+    "healthy": false,
+    "trading_allowed": true,
+    "consecutive_failures": 1,
+    "last_check": 1769477316.3320203,
+    "last_error": "Auth failed; 'OANDAConnector' object has no attribute 'get_prices'",
+    "checks": {
+      "auth": {
+        "ok": false,
+        "latency_ms": 0.0011920928955078125,
+        "error": "Auth failed"
+      },
+      "pricing": {
+        "ok": false,
+        "latency_ms": 0.0035762786865234375,
+        "error": "'OANDAConnector' object has no attribute 'get_prices'"
+      },
+      "orders": {
+        "ok": true,
+        "latency_ms": 0,
+        "error": null
+      },
+      "latency_ms": 0.0035762786865234375
+    }
+  },
+  "errors": [
+    "OCO reconcile error: OANDA_API_TOKEN (or OANDA_TOKEN) and OANDA_ACCOUNT_ID are required"
+  ],
+  "updated_at": "2026-01-27T01:28:36.347307Z"
+}

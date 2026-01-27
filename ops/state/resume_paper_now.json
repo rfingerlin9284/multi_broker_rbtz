@@ -1,0 +1,16 @@
+{
+  "timestamp_utc": "2026-01-27T08:29:46Z",
+  "repo": "/home/ing/RICK/MULTI_BROKER_PHOENIX",
+  "mode": "oanda-only",
+  "trading_mode": "PAPER",
+  "engine_pid": 494363,
+  "old_pid": "250093",
+  "log_file": "/home/ing/RICK/MULTI_BROKER_PHOENIX/logs/engine_headless.log",
+  "env_state_sha256": "698e67af69217cb4a60bbe3e05676f3510ea25d4f39faa4bf732f81eea15ef4e",
+  "proof_of_life": {
+    "watchdog_tick_seen": true,
+    "exit_tick_seen": false,
+    "protect_tick_seen": true
+  },
+  "verdict": "FAIL"
+}

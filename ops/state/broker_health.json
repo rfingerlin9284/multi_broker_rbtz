@@ -1,0 +1,25 @@
+{
+  "healthy": true,
+  "trading_allowed": true,
+  "consecutive_failures": 0,
+  "last_check": 1769506262.0568144,
+  "last_error": null,
+  "checks": {
+    "auth": {
+      "ok": true,
+      "latency_ms": 119.08793449401855,
+      "error": null
+    },
+    "pricing": {
+      "ok": true,
+      "latency_ms": 104.87914085388184,
+      "error": null
+    },
+    "orders": {
+      "ok": true,
+      "latency_ms": 121.11020088195801,
+      "error": null
+    },
+    "latency_ms": 121.11020088195801
+  }
+}

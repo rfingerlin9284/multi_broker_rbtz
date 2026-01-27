@@ -1,0 +1,23 @@
+[Unit]
+Description=RBOTzilla Engine (LIVE) - PIN gated
+After=rbotzilla-broker-link.service
+Wants=rbotzilla-broker-link.service
+
+[Service]
+Type=simple
+User=ing
+WorkingDirectory=/home/ing/RICK/MULTI_BROKER_PHOENIX
+EnvironmentFile=/home/ing/RICK/MULTI_BROKER_PHOENIX/.env
+# ExecStart should be enabled via engine_mode.sh --pin to ensure gating
+ExecStart=/home/ing/RICK/MULTI_BROKER_PHOENIX/tools/run_engine_live.sh
+Restart=always
+RestartSec=3
+StartLimitIntervalSec=60
+StartLimitBurst=10
+TimeoutStartSec=60
+KillMode=control-group
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,8 @@
+{
+  "timestamp_utc": "2026-01-27T08:28:33Z",
+  "toggles_path": "/home/ing/RICK/MULTI_BROKER_PHOENIX/config/toggles.env",
+  "secrets_path": "/home/ing/RICK/MULTI_BROKER_PHOENIX/ops/secrets.env",
+  "duplicates": [""],
+  "missing_keys": [""],
+  "exit_code": 0
+}

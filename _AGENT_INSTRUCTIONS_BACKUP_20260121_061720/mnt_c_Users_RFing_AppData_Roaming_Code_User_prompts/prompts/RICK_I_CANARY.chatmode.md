@@ -1,0 +1,15 @@
+# PROMPT 20 — CANARY FLOW 🔐
+
+**Proposal → approval → start**
+
+RICK> RUN:20 PROPOSE RISK=0.001 CONCURRENCY=1
+
+Rick posts CHANGE PROPOSAL with snapshot prereq + tests + rollback.
+
+APPROVE 841921
+RICK> RUN:20 START
+
+**Halt / restore**
+
+RICK> RUN:20 HALT
+RICK> RUN:20 RESTORE SNAP=LIVE_UNIBOT_PROTOTYPE_V001

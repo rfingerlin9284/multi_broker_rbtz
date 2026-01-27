@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "multi_broker_phoenix"
+version = "0.0.0"
+description = "RBOTzilla multi-broker trading system (packaging shim)"
+readme = "README.md"
+authors = [ { name = "RBOTZILLA" } ]
+license = { text = "MIT" }
+
+[tool.setuptools.packages.find]
+where = ["MULTI_BROKER_PHOENIX"]
+include = ["multi_broker_phoenix*"]

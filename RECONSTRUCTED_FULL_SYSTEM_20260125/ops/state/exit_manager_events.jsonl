@@ -1,0 +1,3 @@
+{"timestamp": "2026-01-27T01:27:03.837517Z", "type": "EXIT_MANAGER_TICK", "checked": 0, "profit_locks": 0, "trailing_updates": 0, "time_closes": 0, "hard_time_closes": 0, "profit_giveback_exits": 0, "profit_giveback_tightens": 0}
+{"timestamp": "2026-01-27T01:27:35.815688Z", "type": "EXIT_MANAGER_TICK", "checked": 0, "profit_locks": 0, "trailing_updates": 0, "time_closes": 0, "hard_time_closes": 0, "profit_giveback_exits": 0, "profit_giveback_tightens": 0}
+{"timestamp": "2026-01-27T01:28:36.334961Z", "type": "EXIT_MANAGER_TICK", "checked": 0, "profit_locks": 0, "trailing_updates": 0, "time_closes": 0, "hard_time_closes": 0, "profit_giveback_exits": 0, "profit_giveback_tightens": 0}

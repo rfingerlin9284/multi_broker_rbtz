@@ -1,0 +1,673 @@
+EXAMPLE OF WHAT I WANT TO SEE UPON START UP WITH TAILING ALL STARTS AT ONCE AUTOMATICALLY!!!
+
+/home/ing/RICK/MULTI_BROKER_PHOENIX && bash -c '
+> set -a
+> source .env
+> set +a
+> 
+> export PYTHONPATH=/home/ing/RICK/MULTI_BROKER_PHOENIX:/home/ing/RICK/MULTI_BROKER_PHOENIX/MULTI_BROKER_PHOENIX
+> export PYTHONUNBUFFERED=1
+> 
+> echo "🚀 DEPLOYING MULTI-STRATEGY LIVE TRADING"
+> echo ""
+> 
+> nohup python3 -u MULTI_BROKER_PHOENIX/tools/run_multi_strategy.py > /tmp/multi_strategy_live.log 2>&1 &
+> PID=$!
+> echo "✅ Multi-strategy trading started (PID: $PID)"
+> echo "   Strategies: fabio_aaa_full, holy_grail, ema_scalper, institutional_sd"
+> echo "   Log: tail -f /tmp/multi_strategy_live.log"
+> echo "   Stop: kill $PID"
+> echo ""
+> sleep 3
+> tail -50 /tmp/multi_strategy_live.log
+> '
+🚀 DEPLOYING MULTI-STRATEGY LIVE TRADING
+
+✅ Multi-strategy trading started (PID: 1225325)
+   Strategies: fabio_aaa_full, holy_grail, ema_scalper, institutional_sd
+   Log: tail -f /tmp/multi_strategy_live.log
+   Stop: kill 1225325
+
+🎯 MULTI-STRATEGY LIVE TRADING SYSTEM
+============================================================
+Loading 4 strategies:
+  ✅ fabio_aaa_full
+  ✅ holy_grail
+  ✅ ema_scalper
+  ✅ institutional_sd
+
+✅ 4 strategies active
+
+Monitoring symbols: EUR_USD, GBP_USD, USD_JPY, AUD_USD, USD_CAD, NZD_USD, USD_CHF, ES, NQ, YM, RTY, GC, SI, HG, CL, NG, BTC-USD, ETH-USD
+Safety limits: $5.0-$10.0 per trade
+Daily loss limit: $50.0
+Max trades/day: 10
+
+🚀 STARTING LIVE TRADING LOOP
+
+ing@oard:~/RICK/MULTI_BROKER_PHOENIX$ kill 1225325
+ing@oard:~/RICK/MULTI_BROKER_PHOENIX$ tail -100 /tmp/multi_strategy_live.log
+🎯 MULTI-STRATEGY LIVE TRADING SYSTEM
+============================================================
+Loading 4 strategies:
+  ✅ fabio_aaa_full
+  ✅ holy_grail
+  ✅ ema_scalper
+  ✅ institutional_sd
+
+✅ 4 strategies active
+
+Monitoring symbols: EUR_USD, GBP_USD, USD_JPY, AUD_USD, USD_CAD, NZD_USD, USD_CHF, ES, NQ, YM, RTY, GC, SI, HG, CL, NG, BTC-USD, ETH-USD
+Safety limits: $5.0-$10.0 per trade
+Daily loss limit: $50.0
+Max trades/day: 10
+
+🚀 STARTING LIVE TRADING LOOP
+
+ing@oard:~/RICK/MULTI_BROKER_PHOENIX$ cd /home/ing/RICK/MULTI_BROKER_PHOENIX && bash -c '
+> set -a
+> source .env
+> set +a
+> 
+> export PYTHONPATH=/home/ing/RICK/MULTI_BROKER_PHOENIX:/home/ing/RICK/MULTI_BROKER_PHOENIX/MULTI_BROKER_PHOENIX
+> export PYTHONUNBUFFERED=1
+> 
+> echo "🚀 RESTARTING MULTI-STRATEGY (CRYPTO ONLY)"
+> echo ""
+> 
+> nohup python3 -u MULTI_BROKER_PHOENIX/tools/run_multi_strategy.py > /tmp/multi_strategy_live.log 2>&1 &
+> PID=$!
+> echo "✅ Trading started (PID: $PID)"
+> echo "   Watching: BTC-USD, ETH-USD, SOL-USD, AVAX-USD, MATIC-USD"
+> echo "   Log: tail -f /tmp/multi_strategy_live.log"
+> echo ""
+> sleep 5
+> tail -60 /tmp/multi_strategy_live.log
+> '
+🚀 RESTARTING MULTI-STRATEGY (CRYPTO ONLY)
+
+✅ Trading started (PID: 1235679)
+   Watching: BTC-USD, ETH-USD, SOL-USD, AVAX-USD, MATIC-USD
+   Log: tail -f /tmp/multi_strategy_live.log
+
+🎯 MULTI-STRATEGY LIVE TRADING SYSTEM
+============================================================
+Loading 4 strategies:
+  ✅ fabio_aaa_full
+  ✅ holy_grail
+  ✅ ema_scalper
+  ✅ institutional_sd
+
+✅ 4 strategies active
+
+Monitoring symbols: BTC-USD, ETH-USD, SOL-USD, AVAX-USD, MATIC-USD
+Safety limits: $5.0-$10.0 per trade
+Daily loss limit: $50.0
+Max trades/day: 10
+
+🔍 Testing Coinbase connectivity...
+  ❌ BTC-USD: Failed to fetch
+  ❌ ETH-USD: Failed to fetch
+  ❌ SOL-USD: Failed to fetch
+  ❌ AVAX-USD: Failed to fetch
+  ❌ MATIC-USD: Failed to fetch
+
+🚀 STARTING LIVE TRADING LOOP
+
+ing@oard:~/RICK/MULTI_BROKER_PHOENIX$ pkill -f run_multi_strategy && sleep 2 && cd /home/ing/RICK/MULTI_BROKER_PHOENIX && bash -c '
+> set -a
+> source .env
+> set +a
+> 
+> export PYTHONPATH=/home/ing/RICK/MULTI_BROKER_PHOENIX:/home/ing/RICK/MULTI_BROKER_PHOENIX/MULTI_BROKER_PHOENIX
+> export PYTHONUNBUFFERED=1
+> 
+> nohup python3 -u MULTI_BROKER_PHOENIX/tools/run_multi_strategy.py > /tmp/multi_strategy_live.log 2>&1 &
+> PID=$!
+> echo "✅ Restarted with JWT auth (PID: $PID)"
+> sleep 5
+> tail -60 /tmp/multi_strategy_live.log
+> '
+✅ Restarted with JWT auth (PID: 1237976)
+🎯 MULTI-STRATEGY LIVE TRADING SYSTEM
+============================================================
+Loading 4 strategies:
+  ✅ fabio_aaa_full
+  ✅ holy_grail
+  ✅ ema_scalper
+  ✅ institutional_sd
+
+✅ 4 strategies active
+
+Monitoring symbols: BTC-USD, ETH-USD, SOL-USD, AVAX-USD, MATIC-USD
+Safety limits: $5.0-$10.0 per trade
+Daily loss limit: $50.0
+Max trades/day: 10
+
+🔍 Testing Coinbase connectivity...
+  ❌ BTC-USD: Failed to fetch
+  ❌ ETH-USD: Failed to fetch
+  ❌ SOL-USD: Failed to fetch
+  ❌ AVAX-USD: Failed to fetch
+  ❌ MATIC-USD: Failed to fetch
+
+🚀 STARTING LIVE TRADING LOOP
+
+ing@oard:~/RICK/MULTI_BROKER_PHOENIX$ cd /home/ing/RICK/MULTI_BROKER_PHOENIX && bash -c '
+> set -a
+> source .env
+> set +a
+> export PYTHONPATH=/home/ing/RICK/MULTI_BROKER_PHOENIX:/home/ing/RICK/MULTI_BROKER_PHOENIX/MULTI_BROKER_PHOENIX
+> 
+> python3 -c "
+> import logging
+> logging.basicConfig(level=logging.DEBUG)
+> from multi_broker_phoenix.brokers.coinbase_safe_connector import CoinbaseSafeConnector
+> c = CoinbaseSafeConnector(paper_mode=False)
+> print(f\"JWT enabled: {c._jwt_enabled}\")
+> print(f\"API key: {c._api_key[:50]}...\")
+> print(f\"Has secret: {bool(c._api_secret)}\")
+> print(f\"Secret length: {len(c._api_secret) if c._api_secret else 0}\")
+> price = c.fetch_live_price(\"BTC-USD\")
+> print(f\"Price: {price}\")
+> "
+> ' 2>&1 | tail -50
+INFO:multi_broker_phoenix.brokers.coinbase_safe_connector:🔧 Coinbase Advanced Trade Connector initialized: 🔴 REAL MONEY
+INFO:multi_broker_phoenix.brokers.coinbase_safe_connector:   API: Coinbase Advanced Trade (v3)
+INFO:multi_broker_phoenix.brokers.coinbase_safe_connector:   JWT Auth: ✅ READY
+INFO:multi_broker_phoenix.brokers.coinbase_safe_connector:   Min trade: $5.00, Max: $10.00
+INFO:multi_broker_phoenix.brokers.coinbase_safe_connector:   Daily loss limit: $50.00
+INFO:multi_broker_phoenix.brokers.coinbase_safe_connector:   Max trades/day: 10
+INFO:multi_broker_phoenix.brokers.coinbase_safe_connector:   Stop after 5 consecutive losses
+INFO:multi_broker_phoenix.brokers.coinbase_safe_connector:🛡️  Trailing Stops ACTIVE:
+INFO:multi_broker_phoenix.brokers.coinbase_safe_connector:   Initial stop: 2.0%
+INFO:multi_broker_phoenix.brokers.coinbase_safe_connector:   Trail activation: +1.5%
+INFO:multi_broker_phoenix.brokers.coinbase_safe_connector:   Trail distance: 1.0%
+DEBUG:multi_broker_phoenix.brokers.coinbase_safe_connector:JWT header: {'alg': 'ES256', 'kid': '63586e87-9813-4d42-8d10-a0d9587bbc2d', 'nonce': '1767606002000', 'typ': 'JWT'}
+DEBUG:multi_broker_phoenix.brokers.coinbase_safe_connector:JWT claims: {'sub': 'organizations/5ae72c85-48da-4842-9e1d-5a6fc32935ee/apiKeys/63586e87-9813-4d42-8d10-a0d9587bbc2d', 'iss': 'coinbase-cloud', 'nbf': 1767606002, 'exp': 1767606122, 'uri': '/api/v3/brokerage/products/BTC-USD/ticker'}
+DEBUG:urllib3.connectionpool:Starting new HTTPS connection (1): api.coinbase.com:443
+DEBUG:urllib3.connectionpool:https://api.coinbase.com:443 "GET /api/v3/brokerage/products/BTC-USD/ticker HTTP/1.1" 401 13
+DEBUG:multi_broker_phoenix.brokers.coinbase_safe_connector:Price fetch failed for BTC-USD: 401 Unauthorized
+
+JWT enabled: True
+API key: organizations/5ae72c85-48da-4842-9e1d-5a6fc32935ee...
+Has secret: True
+Secret length: 227
+Price: None
+ing@oard:~/RICK/MULTI_BROKER_PHOENIX$ cd /home/ing/RICK/MULTI_BROKER_PHOENIX && bash -c '
+> set -a
+> source .env
+> set +a
+> export PYTHONPATH=/home/ing/RICK/MULTI_BROKER_PHOENIX:/home/ing/RICK/MULTI_BROKER_PHOENIX/MULTI_BROKER_PHOENIX
+> 
+> python3 <<EOF
+> from multi_broker_phoenix.brokers.coinbase_safe_connector import CoinbaseSafeConnector
+> import requests
+> 
+> c = CoinbaseSafeConnector(paper_mode=False)
+> endpoint = "/api/v3/brokerage/products/BTC-USD/ticker"
+> url = f"https://api.coinbase.com{endpoint}"
+> 
+> try:
+>     token = c._generate_jwt_token(endpoint=endpoint)
+>     headers = {"Authorization": f"Bearer {token}"}
+>     resp = requests.get(url, headers=headers, timeout=10)
+>     print(f"Status: {resp.status_code}")
+>     print(f"Response: {resp.text}")
+>     print(f"Headers: {resp.headers}")
+> except Exception as e:
+>     print(f"Error: {e}")
+>     import traceback
+>     traceback.print_exc()
+> EOF
+> '
+Status: 401
+Response: Unauthorized
+
+Headers: {'Date': 'Mon, 05 Jan 2026 09:40:21 GMT', 'Content-Type': 'text/plain; charset=utf-8', 'Content-Length': '13', 'Connection': 'keep-alive', 'CF-RAY': '9b920383b8ff4d51-EWR', 'access-control-allow-headers': 'Authorization, Content-Type, Accept, Second-Factor-Proof-Token, Client-Id, Access-Token, X-Cb-Project-Name, X-Cb-Is-Logged-In, X-Cb-Platform, X-Cb-Session-Uuid, X-Cb-Pagekey, X-Cb-UJS, Fingerprint-Tokens, X-Cb-Device-Id, X-Cb-Version-Name', 'access-control-allow-methods': 'GET,POST,DELETE,PUT', 'access-control-allow-private-network': 'true', 'access-control-expose-headers': '', 'access-control-max-age': '7200', 'Cache-Control': 'no-store', 'strict-transport-security': 'max-age=31536000; includeSubDomains; preload', 'trace-id': '9013656564257361075', 'vary': 'Origin', 'x-content-type-options': 'nosniff', 'x-dns-prefetch-control': 'off', 'x-download-options': 'noopen', 'x-frame-options': 'SAMEORIGIN', 'x-xss-protection': '1; mode=block', 'cf-cache-status': 'DYNAMIC', 'Set-Cookie': '__cf_bm=qnJoVeVlIe6Bzlb00to2nLeOT_VWqMz6.tR6Cyq9jpE-1767606021-1.0.1.1-zmvJAs8AZzirIdi3IfYN372sXxW7.DHbP3Wbnt.ObMlLla2kx4hkvDZRUfAOIQO6196Ud0SAlahsMPLCbkNh224TFAGZZcnCHhVOQ0QD_bU; path=/; expires=Mon, 05-Jan-26 10:10:21 GMT; domain=.coinbase.com; HttpOnly; Secure; SameSite=None, _cfuvid=SWW1zL_EJGRkgE8gqaiiQMylF9IH6uQIgEPEQuJeES8-1767606021753-0.0.1.1-604800000; path=/; domain=.coinbase.com; HttpOnly; Secure; SameSite=None', 'Report-To': '{"endpoints":[{"url":"https:\\/\\/a.nel.cloudflare.com\\/report\\/v4?s=AzuwzsDe%2FgLnl%2FJPYlGDW1%2FSmDkmCtxHx8BshNyvI6Wbv%2BRShov7mMC2sd%2FITGDChmIhkbz0r%2FXYV8uzwtl2I%2FXRQJ%2BHG2uq8n%2BrSbJw0aMm%2FOvhh10Gbitx3WdJ1sx%2FRI8%3D"}],"group":"cf-nel","max_age":604800}', 'NEL': '{"success_fraction":0.01,"report_to":"cf-nel","max_age":604800}', 'Server': 'cloudflare'}
+ing@oard:~/RICK/MULTI_BROKER_PHOENIX$ cd /home/ing/RICK/MULTI_BROKER_PHOENIX && bash -c '
+> set -a
+> source .env
+> set +a
+> export PYTHONPATH=/home/ing/RICK/MULTI_BROKER_PHOENIX:/home/ing/RICK/MULTI_BROKER_PHOENIX/MULTI_BROKER_PHOENIX
+> 
+> echo "Testing auth after IP allowlist confirmed..."
+> python3 -c "
+> from multi_broker_phoenix.brokers.coinbase_safe_connector import CoinbaseSafeConnector
+> c = CoinbaseSafeConnector(paper_mode=False)
+> price = c.fetch_live_price(\"BTC-USD\")
+> if price:
+>     print(f\"✅ SUCCESS! BTC-USD: \${price:,.2f}\")
+> else:
+>     print(\"❌ Still failing - checking JWT claims...\")
+>     
+>     # Try with different claim combinations
+>     import requests
+>     endpoint = \"/api/v3/brokerage/products/BTC-USD/ticker\"
+>     url = f\"https://api.coinbase.com{endpoint}\"
+>     
+>     # Try GET method in URI
+>     try:
+>         token = c._generate_jwt_token(endpoint=endpoint, uri_override=f\"GET {endpoint}\")
+>         resp = requests.get(url, headers={\"Authorization\": f\"Bearer {token}\"}, timeout=5)
+>         if resp.status_code == 200:
+>             print(f\"✅ Works with GET prefix! Price: {resp.json()}\")
+>         else:
+>             print(f\"With GET: {resp.status_code}\")
+>     except Exception as e:
+>         print(f\"GET test error: {e}\")
+> "
+> '
+Testing auth after IP allowlist confirmed...
+❌ Still failing - checking JWT claims...
+With GET: 401
+ing@oard:~/RICK/MULTI_BROKER_PHOENIX$ cd /home/ing/RICK/MULTI_BROKER_PHOENIX && bash -c '
+> set -a
+> source .env  
+> set +a
+> export PYTHONPATH=/home/ing/RICK/MULTI_BROKER_PHOENIX:/home/ing/RICK/MULTI_BROKER_PHOENIX/MULTI_BROKER_PHOENIX
+> 
+> python3 <<EOF
+> from multi_broker_phoenix.brokers.coinbase_safe_connector import CoinbaseSafeConnector
+> import requests
+> 
+> c = CoinbaseSafeConnector(paper_mode=False)
+> 
+> # Try public market data endpoint (doesnt need auth)
+> public_url = "https://api.coinbase.com/v2/prices/BTC-USD/spot"
+> resp = requests.get(public_url, timeout=5)
+> print(f"Public API (v2): {resp.status_code}")
+> if resp.status_code == 200:
+>     data = resp.json()
+>     print(f"BTC-USD: \${data[\"data\"][\"amount\"]}")
+>     print("✅ Public API works - issue is with JWT auth")
+> EOF
+> '
+  File "<stdin>", line 12
+    print(f"BTC-USD: ${data[\"data\"][\"amount\"]}")
+                             ^
+SyntaxError: unexpected character after line continuation character
+ing@oard:~/RICK/MULTI_BROKER_PHOENIX$ curl -s "https://api.coinbase.com/v2/prices/BTC-USD/spot" | head -20
+{"data":{"amount":"92599.405","base":"BTC","currency":"USD"}}ing@oard:~/RICK/MULTI_BROKER_PHOENIX$ pkill -f run_multi_strategy && sleep 2 && cd /home/ing/RICK/MULTI_BROKER_PHOENIX && bash -c '
+> set -a
+> source .env
+> set +a
+> 
+> export PYTHONPATH=/home/ing/RICK/MULTI_BROKER_PHOENIX:/home/ing/RICK/MULTI_BROKER_PHOENIX/MULTI_BROKER_PHOENIX
+> export PYTHONUNBUFFERED=1
+> 
+> echo "🚀 STARTING LIVE TRADING (PUBLIC API FOR PRICES)"
+> echo ""
+> 
+> nohup python3 -u MULTI_BROKER_PHOENIX/tools/run_multi_strategy.py > /tmp/multi_strategy_live.log 2>&1 &
+> PID=$!
+> echo "✅ Trading started (PID: $PID)"
+> echo "   Using public Coinbase API for price feeds"
+> echo "   All 4 strategies active"
+> echo "   Log: tail -f /tmp/multi_strategy_live.log"
+> echo ""
+> sleep 5
+> tail -60 /tmp/multi_strategy_live.log
+> '
+🚀 STARTING LIVE TRADING (PUBLIC API FOR PRICES)
+
+✅ Trading started (PID: 1249563)
+   Using public Coinbase API for price feeds
+   All 4 strategies active
+   Log: tail -f /tmp/multi_strategy_live.log
+
+🎯 MULTI-STRATEGY LIVE TRADING SYSTEM
+============================================================
+Loading 4 strategies:
+  ✅ fabio_aaa_full
+  ✅ holy_grail
+  ✅ ema_scalper
+  ✅ institutional_sd
+
+✅ 4 strategies active
+
+Monitoring symbols: BTC-USD, ETH-USD, SOL-USD, AVAX-USD, MATIC-USD
+Safety limits: $5.0-$10.0 per trade
+Daily loss limit: $50.0
+Max trades/day: 10
+
+🔍 Testing Coinbase connectivity (public API)...
+  ✅ BTC-USD: $92,591.99
+  ✅ ETH-USD: $3,164.86
+  ✅ SOL-USD: $135.38
+  ✅ AVAX-USD: $14.21
+  ✅ MATIC-USD: $0.12
+
+🚀 STARTING LIVE TRADING LOOP
+
+ing@oard:~/RICK/MULTI_BROKER_PHOENIX$ tail -f [multi_strategy_live.log](http://_vscodecontentref_/0)
+bash: syntax error near unexpected token `('
+ing@oard:~/RICK/MULTI_BROKER_PHOENIX$ tail -f [multi_strategy_live.log](http://_vscodecontentref_/0)
+bash: syntax error near unexpected token `('
+ing@oard:~/RICK/MULTI_BROKER_PHOENIX$ pkill -f run_multi_strategy && sleep 2 && cd /home/ing/RICK/MULTI_BROKER_PHOENIX && bash -c '
+> set -a
+> source .env
+> set +a
+> 
+> export PYTHONPATH=/home/ing/RICK/MULTI_BROKER_PHOENIX:/home/ing/RICK/MULTI_BROKER_PHOENIX/MULTI_BROKER_PHOENIX
+> export PYTHONUNBUFFERED=1
+> 
+> echo "🚀 RESTARTING WITH ALL 3 BROKERS (COINBASE + OANDA + IBKR)"
+> echo ""
+> 
+> nohup python3 -u MULTI_BROKER_PHOENIX/tools/run_multi_strategy.py > /tmp/multi_strategy_live.log 2>&1 &
+> PID=$!
+> echo "✅ Trading started (PID: $PID)"
+> echo "   Coinbase: BTC-USD, ETH-USD (real money $5-10)"
+> echo "   OANDA: EUR_USD, GBP_USD, USD_JPY (paper)"
+> echo "   IBKR: Available if Gateway running (paper)"
+> echo "   Log: tail -f /tmp/multi_strategy_live.log"
+> echo ""
+> sleep 5
+> tail -80 /tmp/multi_strategy_live.log
+> '
+🚀 RESTARTING WITH ALL 3 BROKERS (COINBASE + OANDA + IBKR)
+
+✅ Trading started (PID: 1400323)
+   Coinbase: BTC-USD, ETH-USD (real money -10)
+   OANDA: EUR_USD, GBP_USD, USD_JPY (paper)
+   IBKR: Available if Gateway running (paper)
+   Log: tail -f /tmp/multi_strategy_live.log
+
+🎯 MULTI-STRATEGY LIVE TRADING SYSTEM
+============================================================
+Loading 4 strategies:
+  ✅ fabio_aaa_full
+  ✅ holy_grail
+  ✅ ema_scalper
+  ✅ institutional_sd
+
+✅ 4 strategies active
+
+🔧 Initializing brokers...
+  ✅ Coinbase (crypto - real money $5-10)
+  ✅ OANDA (FX - paper trading)
+  ⚠️  IBKR failed: IBKRConnector.__init__() got an unexpected keyword argument 'host'
+
+Monitoring 5 symbols: BTC-USD, ETH-USD, EUR_USD, GBP_USD, USD_JPY
+Coinbase limits: $5.0-$10.0 per trade, $50.0 daily loss limit
+Max trades/day: 10
+
+🔍 Testing connectivity...
+  ✅ BTC-USD: $92,876.0350 (Coinbase)
+  ✅ ETH-USD: $3,173.8750 (Coinbase)
+  ✅ EUR_USD: $1.1684 (OANDA)
+  ✅ GBP_USD: $1.3454 (OANDA)
+  ✅ USD_JPY: $156.7135 (OANDA)
+
+🚀 STARTING LIVE TRADING LOOP
+
+ing@oard:~/RICK/MULTI_BROKER_PHOENIX$ ps aux | grep run_multi_strategy | grep -v grep
+ing      1400323  4.4  0.1  45976 37120 pts/20   S    05:36   0:03 python3 -u MULTI_BROKER_PHOENIX/tools/run_multi_strategy.py
+ing@oard:~/RICK/MULTI_BROKER_PHOENIX$ tail -200 /tmp/multi_strategy_live.log | tail -50
+============================================================
+Loading 4 strategies:
+  ✅ fabio_aaa_full
+  ✅ holy_grail
+  ✅ ema_scalper
+  ✅ institutional_sd
+
+✅ 4 strategies active
+
+🔧 Initializing brokers...
+  ✅ Coinbase (crypto - real money $5-10)
+  ✅ OANDA (FX - paper trading)
+  ⚠️  IBKR failed: IBKRConnector.__init__() got an unexpected keyword argument 'host'
+
+Monitoring 5 symbols: BTC-USD, ETH-USD, EUR_USD, GBP_USD, USD_JPY
+Coinbase limits: $5.0-$10.0 per trade, $50.0 daily loss limit
+Max trades/day: 10
+
+🔍 Testing connectivity...
+  ✅ BTC-USD: $92,876.0350 (Coinbase)
+  ✅ ETH-USD: $3,173.8750 (Coinbase)
+  ✅ EUR_USD: $1.1684 (OANDA)
+  ✅ GBP_USD: $1.3454 (OANDA)
+  ✅ USD_JPY: $156.7135 (OANDA)
+
+🚀 STARTING LIVE TRADING LOOP
+
+[05:37:25] 🎯 holy_grail: ETH-USD SELL @ $3,166.08
+[05:37:25] 🏆 BEST: holy_grail (confidence: 50.00%)
+[05:37:25] 🚫 BLOCKED: missing_regime
+[05:37:28] 🎯 holy_grail: ETH-USD SELL @ $3,166.08
+[05:37:28] 🏆 BEST: holy_grail (confidence: 50.00%)
+[05:37:28] 🚫 BLOCKED: missing_regime
+[05:37:31] 🎯 fabio_aaa_full: EUR_USD BUY @ $1.17
+[05:37:31] 🏆 BEST: fabio_aaa_full (confidence: 50.00%)
+[05:37:31] 🚫 BLOCKED: missing_regime
+[05:37:31] 🎯 fabio_aaa_full: GBP_USD BUY @ $1.35
+[05:37:31] 🏆 BEST: fabio_aaa_full (confidence: 50.00%)
+[05:37:31] 🚫 BLOCKED: missing_regime
+[05:37:34] 🎯 holy_grail: ETH-USD SELL @ $3,165.26
+[05:37:34] 🎯 ema_scalper: ETH-USD SELL @ $3,165.26
+[05:37:34] 🏆 BEST: holy_grail (confidence: 50.00%)
+[05:37:34] 🚫 BLOCKED: missing_regime
+[05:37:34] 🎯 fabio_aaa_full: GBP_USD BUY @ $1.35
+[05:37:34] 🏆 BEST: fabio_aaa_full (confidence: 50.00%)
+[05:37:34] 🚫 BLOCKED: missing_regime
+[05:37:40] 🎯 holy_grail: ETH-USD SELL @ $3,160.64
+[05:37:40] 🎯 ema_scalper: ETH-USD SELL @ $3,160.64
+[05:37:40] 🏆 BEST: holy_grail (confidence: 50.00%)
+[05:37:40] 🚫 BLOCKED: missing_regime
+ing@oard:~/RICK/MULTI_BROKER_PHOENIX$ pkill -f run_multi_strategy && sleep 2 && cd /home/ing/RICK/MULTI_BROKER_PHOENIX && bash -c '
+> set -a
+> source .env
+> set +a
+> 
+> export PYTHONPATH=/home/ing/RICK/MULTI_BROKER_PHOENIX:/home/ing/RICK/MULTI_BROKER_PHOENIX/MULTI_BROKER_PHOENIX
+> export PYTHONUNBUFFERED=1
+> 
+> nohup python3 -u MULTI_BROKER_PHOENIX/tools/run_multi_strategy.py > /tmp/multi_strategy_live.log 2>&1 &
+> PID=$!
+> echo "✅ Restarted with regime blocker disabled (PID: $PID)"
+> echo "   Orders should now execute!"
+> echo ""
+> sleep 8
+> tail -60 /tmp/multi_strategy_live.log
+> '
+✅ Restarted with regime blocker disabled (PID: 1406391)
+   Orders should now execute!
+
+🎯 MULTI-STRATEGY LIVE TRADING SYSTEM
+============================================================
+Loading 4 strategies:
+  ✅ fabio_aaa_full
+  ✅ holy_grail
+  ✅ ema_scalper
+  ✅ institutional_sd
+
+✅ 4 strategies active
+
+🔧 Initializing brokers...
+  ✅ Coinbase (crypto - real money $5-10)
+  ✅ OANDA (FX - paper trading)
+  ⚠️  IBKR failed: IBKRConnector.__init__() got an unexpected keyword argument 'host'
+
+Monitoring 5 symbols: BTC-USD, ETH-USD, EUR_USD, GBP_USD, USD_JPY
+Coinbase limits: $5.0-$10.0 per trade, $50.0 daily loss limit
+Max trades/day: 10
+
+🔍 Testing connectivity...
+  ✅ BTC-USD: $92,823.0650 (Coinbase)
+  ✅ ETH-USD: $3,163.2650 (Coinbase)
+  ✅ EUR_USD: $1.1685 (OANDA)
+  ✅ GBP_USD: $1.3455 (OANDA)
+  ✅ USD_JPY: $156.7125 (OANDA)
+
+🚀 STARTING LIVE TRADING LOOP
+
+ing@oard:~/RICK/MULTI_BROKER_PHOENIX$ sleep 15 && tail -100 /tmp/multi_strategy_live.log | grep -E "BLOCKED|ORDER|💰|❌|🎯" | tail -30
+🎯 MULTI-STRATEGY LIVE TRADING SYSTEM
+ing@oard:~/RICK/MULTI_BROKER_PHOENIX$ tail -200 /tmp/multi_strategy_live.log | tail -50
+🎯 MULTI-STRATEGY LIVE TRADING SYSTEM
+============================================================
+Loading 4 strategies:
+  ✅ fabio_aaa_full
+  ✅ holy_grail
+  ✅ ema_scalper
+  ✅ institutional_sd
+
+✅ 4 strategies active
+
+🔧 Initializing brokers...
+  ✅ Coinbase (crypto - real money $5-10)
+  ✅ OANDA (FX - paper trading)
+  ⚠️  IBKR failed: IBKRConnector.__init__() got an unexpected keyword argument 'host'
+
+Monitoring 5 symbols: BTC-USD, ETH-USD, EUR_USD, GBP_USD, USD_JPY
+Coinbase limits: $5.0-$10.0 per trade, $50.0 daily loss limit
+Max trades/day: 10
+
+🔍 Testing connectivity...
+  ✅ BTC-USD: $92,823.0650 (Coinbase)
+  ✅ ETH-USD: $3,163.2650 (Coinbase)
+  ✅ EUR_USD: $1.1685 (OANDA)
+  ✅ GBP_USD: $1.3455 (OANDA)
+  ✅ USD_JPY: $156.7125 (OANDA)
+
+🚀 STARTING LIVE TRADING LOOP
+
+ing@oard:~/RICK/MULTI_BROKER_PHOENIX$ pkill -f run_multi_strategy && sleep 2 && cd /home/ing/RICK/MULTI_BROKER_PHOENIX && bash -c '
+> set -a
+> source .env
+> set +a
+> 
+> export PYTHONPATH=/home/ing/RICK/MULTI_BROKER_PHOENIX:/home/ing/RICK/MULTI_BROKER_PHOENIX/MULTI_BROKER_PHOENIX
+> export PYTHONUNBUFFERED=1
+> 
+> nohup python3 -u MULTI_BROKER_PHOENIX/tools/run_multi_strategy.py > /tmp/multi_strategy_live.log 2>&1 &
+> PID=$!
+> echo "✅ Restarted with data collection progress (PID: $PID)"
+> echo "   Will show progress until 200 prices collected"
+> echo "   Then strategies will start generating signals"
+> echo ""
+> sleep 10
+> tail -60 /tmp/multi_strategy_live.log
+> '
+✅ Restarted with data collection progress (PID: 1410578)
+   Will show progress until 200 prices collected
+   Then strategies will start generating signals
+
+🎯 MULTI-STRATEGY LIVE TRADING SYSTEM
+============================================================
+Loading 4 strategies:
+  ✅ fabio_aaa_full
+  ✅ holy_grail
+  ✅ ema_scalper
+  ✅ institutional_sd
+
+✅ 4 strategies active
+
+🔧 Initializing brokers...
+  ✅ Coinbase (crypto - real money $5-10)
+  ✅ OANDA (FX - paper trading)
+  ⚠️  IBKR failed: IBKRConnector.__init__() got an unexpected keyword argument 'host'
+
+Monitoring 5 symbols: BTC-USD, ETH-USD, EUR_USD, GBP_USD, USD_JPY
+Coinbase limits: $5.0-$10.0 per trade, $50.0 daily loss limit
+Max trades/day: 10
+
+🔍 Testing connectivity...
+  ✅ BTC-USD: $92,901.9450 (Coinbase)
+  ✅ ETH-USD: $3,167.4450 (Coinbase)
+  ✅ EUR_USD: $1.1686 (OANDA)
+  ✅ GBP_USD: $1.3454 (OANDA)
+  ✅ USD_JPY: $156.7280 (OANDA)
+
+🚀 STARTING LIVE TRADING LOOP
+
+[05:39:41] 📊 BTC-USD: Collecting data... 1/200 prices
+[05:39:41] 📊 ETH-USD: Collecting data... 1/200 prices
+[05:39:41] 📊 EUR_USD: Collecting data... 1/200 prices
+[05:39:41] 📊 GBP_USD: Collecting data... 1/200 prices
+[05:39:41] 📊 USD_JPY: Collecting data... 1/200 prices
+ing@oard:~/RICK/MULTI_BROKER_PHOENIX$ pkill -f run_multi_strategy && sleep 2 && cd /home/ing/RICK/MULTI_BROKER_PHOENIX && bash -c '
+> set -a
+> source .env
+> set +a
+> 
+> export PYTHONPATH=/home/ing/RICK/MULTI_BROKER_PHOENIX:/home/ing/RICK/MULTI_BROKER_PHOENIX/MULTI_BROKER_PHOENIX
+> export PYTHONUNBUFFERED=1
+> 
+> nohup python3 -u MULTI_BROKER_PHOENIX/tools/run_multi_strategy.py > /tmp/multi_strategy_live.log 2>&1 &
+> PID=$!
+> echo "🚀 FAST START - Reduced data requirement"
+> echo "   Need only 30 prices (was 200)"
+> echo "   Trading starts in ~2.5 minutes!"
+> echo "   PID: $PID"
+> echo ""
+> sleep 10
+> tail -60 /tmp/multi_strategy_live.log
+> '
+🚀 FAST START - Reduced data requirement
+   Need only 30 prices (was 200)
+   Trading starts in ~2.5 minutes!
+   PID: 1539892
+
+🎯 MULTI-STRATEGY LIVE TRADING SYSTEM
+============================================================
+Loading 4 strategies:
+  ✅ fabio_aaa_full
+  ✅ holy_grail
+  ✅ ema_scalper
+  ✅ institutional_sd
+
+✅ 4 strategies active
+
+🔧 Initializing brokers...
+  ✅ Coinbase (crypto - real money $5-10)
+  ✅ OANDA (FX - paper trading)
+  ⚠️  IBKR failed: IBKRConnector.__init__() got an unexpected keyword argument 'host'
+
+Monitoring 5 symbols: BTC-USD, ETH-USD, EUR_USD, GBP_USD, USD_JPY
+Coinbase limits: $5.0-$10.0 per trade, $50.0 daily loss limit
+Max trades/day: 10
+
+🔍 Testing connectivity...
+  ✅ BTC-USD: $93,037.4150 (Coinbase)
+  ✅ ETH-USD: $3,175.7600 (Coinbase)
+  ✅ EUR_USD: $1.1687 (OANDA)
+  ✅ GBP_USD: $1.3470 (OANDA)
+  ✅ USD_JPY: $156.5720 (OANDA)
+
+🚀 STARTING LIVE TRADING LOOP
+
+[06:24:25] 📊 BTC-USD: Collecting data... 1/30 prices
+[06:24:25] 📊 ETH-USD: Collecting data... 1/30 prices
+[06:24:25] 📊 EUR_USD: Collecting data... 1/30 prices
+[06:24:25] 📊 GBP_USD: Collecting data... 1/30 prices
+[06:24:25] 📊 USD_JPY: Collecting data... 1/30 prices
+ing@oard:~/RICK/MULTI_BROKER_PHOENIX$ tail -f /tmp/multi_strategy_live.log
+[08:01:07] 🚫 BLOCKED: regime_disabled
+[08:01:10] 🎯 fabio_aaa_full: BTC-USD BUY @ $92,842.36
+[08:01:10] 🏆 BEST: fabio_aaa_full (confidence: 50.00%)
+[08:01:10] 🚫 BLOCKED: regime_disabled
+[08:01:10] 🎯 fabio_aaa_full: ETH-USD BUY @ $3,169.38
+[08:01:10] 🏆 BEST: fabio_aaa_full (confidence: 50.00%)
+[08:01:10] 🚫 BLOCKED: regime_disabled
+[08:01:10] 🎯 fabio_aaa_full: USD_JPY BUY @ $156.69
+[08:01:10] 🏆 BEST: fabio_aaa_full (confidence: 50.00%)
+[08:01:10] 🚫 BLOCKED: regime_disabled
+[08:01:13] 🎯 fabio_aaa_full: USD_JPY BUY @ $156.71
+[08:01:13] 🏆 BEST: fabio_aaa_full (confidence: 50.00%)
+[08:01:13] 🚫 BLOCKED: regime_disabled
+[08:01:16] 🎯 fabio_aaa_full: USD_JPY BUY @ $156.71
+[08:01:16] 🏆 BEST: fabio_aaa_full (confidence: 50.00%)
+[08:01:16] 🚫 BLOCKED: regime_disabled
+[08:01:20] 🎯 fabio_aaa_full: USD_JPY BUY @ $156.71
+[08:01:20] 🏆 BEST: fabio_aaa_full (confidence: 50.00%)
+[08:01:20] 🚫 BLOCKED: regime_disabled
+[08:01:23] 🎯 fabio_aaa_full: USD_JPY BUY @ $156.70
+[08:01:23] 🏆 BEST: fabio_aaa_full (confidence: 50.00%)
+[08:01:23] 🚫 BLOCKED: regime_disabled
+[08:01:26] 🎯 fabio_aaa_full: USD_JPY BUY @ $156.71
+[08:01:26] 🏆 BEST: fabio_aaa_full (confidence: 50.00%)
+[08:01:26] 🚫 BLOCKED: regime_disabled
+[08:01:30] 🎯 fabio_aaa_full: USD_JPY BUY @ $156.71
+[08:01:30] 🏆 BEST: fabio_aaa_full (confidence: 50.00%)

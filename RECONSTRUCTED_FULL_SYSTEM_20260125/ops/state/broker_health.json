@@ -1,0 +1,25 @@
+{
+  "healthy": false,
+  "trading_allowed": true,
+  "consecutive_failures": 2,
+  "last_check": 1769477326.3403716,
+  "last_error": "Auth failed; 'OANDAConnector' object has no attribute 'get_prices'",
+  "checks": {
+    "auth": {
+      "ok": false,
+      "latency_ms": 0.002384185791015625,
+      "error": "Auth failed"
+    },
+    "pricing": {
+      "ok": false,
+      "latency_ms": 0.0054836273193359375,
+      "error": "'OANDAConnector' object has no attribute 'get_prices'"
+    },
+    "orders": {
+      "ok": true,
+      "latency_ms": 0,
+      "error": null
+    },
+    "latency_ms": 0.0054836273193359375
+  }
+}

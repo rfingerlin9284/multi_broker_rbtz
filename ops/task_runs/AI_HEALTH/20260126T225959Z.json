@@ -1,0 +1,13 @@
+{
+  "task_name": "AI_HEALTH",
+  "timestamp": "20260126T225959Z",
+  "command": "/home/ing/RICK/MULTI_BROKER_PHOENIX/tools/ai_health.sh",
+  "script_path": "/home/ing/RICK/MULTI_BROKER_PHOENIX/tools/ai_health.sh",
+  "script_hash": "9b23af30829179b2ef2c9e52ad8ee169f8ed228d75e3feb84008e7ff2dc2c5a5",
+  "exit_code": 0,
+  "commit": "bc8cf753d7d57aa08ff61dc7d76b52814c7e9e0b",
+  "toggles_hash": "136e7c302f9c8b2c512103d536574f754c2e4d9dfda7d8cdd0445a2b0805195b",
+  "log_file": "/home/ing/RICK/MULTI_BROKER_PHOENIX/ops/task_runs/AI_HEALTH/20260126T225959Z.log",
+  "summary_file": "/home/ing/RICK/MULTI_BROKER_PHOENIX/ops/task_runs/AI_HEALTH/20260126T225959Z.summary.txt",
+  "summary_hash": "e740bcc89b5fdba907110c3ca904ff6cd4daba135914aa62aea8d9ed344470aa"
+}

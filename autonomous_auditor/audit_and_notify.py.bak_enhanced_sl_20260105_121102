@@ -1,0 +1,82 @@
+#!/usr/bin/env python3
+import os
+import json
+import logging
+from datetime import datetime
+from pathlib import Path
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s | %(message)s')
+
+PROJECT_ROOT = Path("/home/ing/RICK/MULTI_BROKER_PHOENIX")
+RESULTS_JSON = PROJECT_ROOT / "results" / "strategy_pack_results.json"
+LIVE_LOG = Path("/tmp/multi_strategy_live.log")
+HIVE_TASKS = PROJECT_ROOT / "HIVE_TASKS.md"
+
+def load_backtest_results():
+    if RESULTS_JSON.exists():
+        try:
+            with open(RESULTS_JSON) as f:
+                return json.load(f)
+        except:
+            return {}
+    return {}
+
+def analyze_live_log():
+    if not LIVE_LOG.exists():
+        return {"trades": 0, "wins": 0, "daily_loss": 0.0}
+    
+    content = LIVE_LOG.read_text()
+    trades = content.count("ORDER PLACED") + content.count("LIVE ORDER SUCCESS")
+    wins = content.count("profit")  # simplistic - improve later
+    loss_lines = [l for l in content.splitlines() if "loss" in l.lower()]
+    daily_loss = sum(float(l.split("$")[-1]) for l in loss_lines if "$" in l)
+    return {"trades": trades, "wins": wins, "daily_loss": abs(daily_loss)}
+
+def audit_strategies(backtest_data, live_data):
+    issues = []
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
+    
+    for strat, metrics in backtest_data.get("strategies", {}).items():
+        win_rate = metrics.get("win_rate", 0.0)
+        pf = metrics.get("profit_factor", 0.0)
+        dd = metrics.get("max_dd", 0.0)
+        
+        if win_rate < 55.0:
+            issues.append(f"[{timestamp}] STRATEGY {strat}: Win rate {win_rate:.1f}% < 55% → tighten filters or re-tune absorption")
+        if pf < 1.2:
+            issues.append(f"[{timestamp}] STRATEGY {strat}: PF {pf:.2f} < 1.2 → reduce risk or improve entry timing")
+        if dd > 8.0:
+            issues.append(f"[{timestamp}] STRATEGY {strat}: Max DD {dd:.1f}% > 8% → improve stop logic or position sizing")
+
+    # Stop loss audit (simplified - counts early exits vs hits)
+    sl_hits = live_data.get("trades", 0) * 0.3  # placeholder - replace with real parsing
+    if sl_hits / max(live_data.get("trades", 1), 1) > 0.4:
+        issues.append(f"[{timestamp}] STOP LOSS: Hit rate too high (>40%) → stops too tight")
+    elif sl_hits / max(live_data.get("trades", 1), 1) < 0.15:
+        issues.append(f"[{timestamp}] STOP LOSS: Hit rate too low (<15%) → stops too wide")
+
+    if live_data.get("daily_loss", 0) > 30.0:
+        issues.append(f"[{timestamp}] RISK: Daily loss ${live_data['daily_loss']:.2f} > $30 → reduce size or pause high-risk strats")
+
+    return issues
+
+def notify_hive(issues):
+    if not issues:
+        logging.info("Audit complete - system healthy, no Hive tasks")
+        return
+    
+    logging.warning(f"{len(issues)} performance issues detected - notifying Hive")
+    
+    with open(HIVE_TASKS, "w") as f:
+        f.write("# HIVE AUTONOMOUS TASK QUEUE\n")
+        f.write(f"# Audit: {datetime.now().strftime('%Y-%m-%d %H:%M')}\n\n")
+        f.write("**URGENT TASKS - FIX TO MAINTAIN EDGE**\n\n")
+        for issue in issues:
+            f.write(f"- {issue}\n")
+        f.write("\n**Process and clear when resolved**\n")
+
+if __name__ == "__main__":
+    backtest = load_backtest_results()
+    live = analyze_live_log()
+    issues = audit_strategies(backtest, live)
+    notify_hive(issues)

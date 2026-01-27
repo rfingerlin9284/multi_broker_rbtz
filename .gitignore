@@ -1,0 +1,42 @@
+# Secrets / environment files
+.env
+.env.*
+!.env.example
+!.env.example.*
+ops/secrets.env
+~/.config/rbotzilla/secrets.env
+/etc/rbotzilla/secrets.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+.venv/
+MULTI_BROKER_PHOENIX/.venv/
+
+# Logs / runtime artifacts
+logs/
+/tmp/
+*.log
+
+# Keys / certs
+*.pem
+*.key
+*.p12
+
+# OS / editor
+.DS_Store
+.vscode/
+audit_runs/
+
+# Secrets and audit files
+audit_runs/
+ops/secrets.env
+*.out

@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RICK BATTLESTATION - Command Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Orbitron', monospace;
+            background: #000;
+            color: #0f0;
+            overflow-x: hidden;
+        }
+        
+        .battlestation-header {
+            background: linear-gradient(180deg, #001100 0%, #000 100%);
+            border-bottom: 2px solid #0f0;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+        }
+        
+        .battlestation-header h1 {
+            font-size: 32px;
+            color: #ffaa00;
+            text-shadow: 0 0 10px #ffaa00;
+            margin-bottom: 10px;
+        }
+        
+        .battlestation-header .subtitle {
+            font-size: 14px;
+            color: #0f0;
+            opacity: 0.8;
+        }
+        
+        .connection-status {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 8px 15px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid #0f0;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 1000;
+        }
+        
+        .connection-status.connected {
+            border-color: #0f0;
+            color: #0f0;
+        }
+        
+        .connection-status.disconnected {
+            border-color: #f44;
+            color: #f44;
+        }
+        
+        .battlestation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+        
+        .panel {
+            background: rgba(0, 20, 0, 0.95);
+            border: 2px solid #0f0;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.2);
+        }
+        
+        .panel-header {
+            font-size: 18px;
+            color: #ffaa00;
+            margin-bottom: 15px;
+            text-shadow: 0 0 5px #ffaa00;
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+        }
+        
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #111;
+        }
+        
+        .stat-label {
+            color: #888;
+            font-size: 13px;
+        }
+        
+        .stat-value {
+            color: #0f0;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .stat-value.positive {
+            color: #0f0;
+            text-shadow: 0 0 5px #0f0;
+        }
+        
+        .stat-value.negative {
+            color: #f44;
+            text-shadow: 0 0 5px #f44;
+        }
+        
+        .stat-value.warning {
+            color: #ffaa00;
+            text-shadow: 0 0 5px #ffaa00;
+        }
+        
+        .position-card {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #333;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 8px 0;
+        }
+        
+        .position-symbol {
+            font-size: 16px;
+            color: #0f0;
+            font-weight: bold;
+        }
+        
+        .position-details {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            font-size: 12px;
+            color: #888;
+        }
+        
+        .event-log {
+            max-height: 400px;
+            overflow-y: auto;
+            font-size: 12px;
+        }
+        
+        .event-item {
+            padding: 8px;
+            margin: 4px 0;
+            background: rgba(0, 0, 0, 0.5);
+            border-left: 3px solid #0f0;
+            border-radius: 3px;
+        }
+        
+        .event-item.trade-opened {
+            border-left-color: #0f0;
+        }
+        
+        .event-item.trade-closed {
+            border-left-color: #ffaa00;
+        }
+        
+        .event-item.phase-graduation {
+            border-left-color: #00f;
+            animation: pulse 2s infinite;
+        }
+        
+        .event-item.gate-rejection {
+            border-left-color: #f44;
+        }
+        
+        .event-timestamp {
+            color: #666;
+            font-size: 10px;
+        }
+        
+        .phase-indicator {
+            text-align: center;
+            padding: 15px;
+            background: linear-gradient(135deg, #001100 0%, #000 100%);
+            border: 2px solid #0f0;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .phase-number {
+            font-size: 48px;
+            color: #0f0;
+            text-shadow: 0 0 20px #0f0;
+            font-weight: 900;
+        }
+        
+        .phase-name {
+            font-size: 14px;
+            color: #888;
+            margin-top: 5px;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        
+        .no-data {
+            text-align: center;
+            color: #666;
+            padding: 20px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="battlestation-header">
+        <h1>🚀 RICK BATTLESTATION</h1>
+        <div class="subtitle">PIN: 841921 | Charter Compliant | Real-Time Command Center</div>
+    </div>
+    
+    <div class="connection-status" id="connection-status">
+        Connecting...
+    </div>
+    
+    <div class="battlestation-grid">
+        <!-- Phase & Capital -->
+        <div class="panel">
+            <div class="panel-header">📊 CURRENT PHASE</div>
+            <div class="phase-indicator">
+                <div class="phase-number" id="phase-number">1</div>
+                <div class="phase-name" id="phase-name">NANO_SPOT</div>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Total Capital:</span>
+                <span class="stat-value" id="total-capital">$0.00</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Total P&L:</span>
+                <span class="stat-value" id="total-pnl">$0.00</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Daily P&L:</span>
+                <span class="stat-value" id="daily-pnl">$0.00</span>
+            </div>
+        </div>
+        
+        <!-- Performance Stats -->
+        <div class="panel">
+            <div class="panel-header">📈 PERFORMANCE</div>
+            <div class="stat-row">
+                <span class="stat-label">Win Rate:</span>
+                <span class="stat-value" id="win-rate">0%</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Profit Factor:</span>
+                <span class="stat-value" id="profit-factor">0.00</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Total Trades:</span>
+                <span class="stat-value" id="total-trades">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Trailing Stops:</span>
+                <span class="stat-value" id="trailing-stops">0</span>
+            </div>
+        </div>
+        
+        <!-- System Status -->
+        <div class="panel">
+            <div class="panel-header">🛡️ SYSTEM STATUS</div>
+            <div class="stat-row">
+                <span class="stat-label">Entry Gates:</span>
+                <span class="stat-value warning" id="entry-gates">STANDBY</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Guardian Gates:</span>
+                <span class="stat-value warning" id="guardian-gates">STANDBY</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Adaptive AI:</span>
+                <span class="stat-value" id="adaptive-ai">READY</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Voice Narrator:</span>
+                <span class="stat-value" id="voice-status">READY</span>
+            </div>
+        </div>
+        
+        <!-- Open Positions -->
+        <div class="panel" style="grid-column: span 2;">
+            <div class="panel-header">📍 OPEN POSITIONS</div>
+            <div id="positions-container">
+                <div class="no-data">No open positions</div>
+            </div>
+        </div>
+        
+        <!-- Event Log -->
+        <div class="panel" style="grid-column: span 2;">
+            <div class="panel-header">📜 EVENT LOG</div>
+            <div class="event-log" id="event-log">
+                <div class="no-data">Waiting for events...</div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="rick_voice_narrator.js"></script>
+    <script>
+        // Initialize voice narrator
+        const rickVoice = new RickVoiceNarrator();
+        
+        // WebSocket connection
+        let ws = null;
+        let reconnectTimer = null;
+        
+        function connectWebSocket() {
+            ws = new WebSocket('ws://localhost:8888');
+            
+            ws.onopen = () => {
+                console.log('✅ Connected to RICK Battlestation');
+                updateConnectionStatus(true);
+                clearEventLog('Connected to battlestation');
+            };
+            
+            ws.onmessage = (event) => {
+                try {
+                    const message = JSON.parse(event.data);
+                    handleMessage(message);
+                } catch (e) {
+                    console.error('Failed to parse message:', e);
+                }
+            };
+            
+            ws.onerror = (error) => {
+                console.error('WebSocket error:', error);
+            };
+            
+            ws.onclose = () => {
+                console.log('❌ Disconnected from RICK Battlestation');
+                updateConnectionStatus(false);
+                
+                // Attempt reconnection
+                reconnectTimer = setTimeout(connectWebSocket, 5000);
+            };
+        }
+        
+        function updateConnectionStatus(connected) {
+            const statusEl = document.getElementById('connection-status');
+            if (connected) {
+                statusEl.textContent = '🟢 CONNECTED';
+                statusEl.className = 'connection-status connected';
+            } else {
+                statusEl.textContent = '🔴 DISCONNECTED';
+                statusEl.className = 'connection-status disconnected';
+            }
+        }
+        
+        function handleMessage(message) {
+            console.log('📡 Message:', message.type);
+            
+            switch (message.type) {
+                case 'status_update':
+                    updateStatus(message.data);
+                    break;
+                case 'trade_opened':
+                    handleTradeOpened(message);
+                    break;
+                case 'trade_closed':
+                    handleTradeClosed(message);
+                    break;
+                case 'phase_graduation':
+                    handlePhaseGraduation(message);
+                    break;
+                case 'gate_rejection':
+                    handleGateRejection(message);
+                    break;
+                case 'price_update':
+                    handlePriceUpdate(message);
+                    break;
+            }
+        }
+        
+        function updateStatus(status) {
+            // Phase
+            const phaseNum = status.phase.split('_')[0] === 'NANO' ? 1 : 
+                            status.phase.split('_')[0] === 'SCALED' ? 2 :
+                            status.phase.split('_')[0] === 'LOW' ? 3 :
+                            status.phase.split('_')[0] === 'MID' ? 4 : 5;
+            document.getElementById('phase-number').textContent = phaseNum;
+            document.getElementById('phase-name').textContent = status.phase;
+            
+            // Capital & P&L
+            document.getElementById('total-capital').textContent = `$${status.capital.toFixed(2)}`;
+            
+            const pnlEl = document.getElementById('total-pnl');
+            pnlEl.textContent = `$${status.total_pnl.toFixed(2)}`;
+            pnlEl.className = status.total_pnl >= 0 ? 'stat-value positive' : 'stat-value negative';
+            
+            const dailyEl = document.getElementById('daily-pnl');
+            dailyEl.textContent = `$${status.daily_pnl.toFixed(2)}`;
+            dailyEl.className = status.daily_pnl >= 0 ? 'stat-value positive' : 'stat-value negative';
+            
+            // Performance
+            document.getElementById('win-rate').textContent = `${(status.win_rate * 100).toFixed(1)}%`;
+            document.getElementById('profit-factor').textContent = status.profit_factor.toFixed(2);
+            document.getElementById('total-trades').textContent = status.total_trades;
+            document.getElementById('trailing-stops').textContent = status.trailing_stops_active;
+            
+            // System status
+            document.getElementById('entry-gates').textContent = status.entry_gates_status;
+            document.getElementById('guardian-gates').textContent = status.guardian_gates_status;
+            document.getElementById('adaptive-ai').textContent = status.adaptive_ai_learning ? 'LEARNING' : 'READY';
+            document.getElementById('voice-status').textContent = status.voice_enabled ? 'ACTIVE' : 'MUTED';
+            
+            // Open positions
+            updatePositions(status.open_positions);
+        }
+        
+        function updatePositions(positions) {
+            const container = document.getElementById('positions-container');
+            
+            if (positions.length === 0) {
+                container.innerHTML = '<div class="no-data">No open positions</div>';
+                return;
+            }
+            
+            container.innerHTML = positions.map(pos => `
+                <div class="position-card">
+                    <div class="position-symbol">${pos.symbol} - ${pos.side}</div>
+                    <div class="position-details">
+                        <span>Entry: $${pos.entry_price.toFixed(2)}</span>
+                        <span>Size: $${pos.size.toFixed(2)}</span>
+                        <span class="${pos.pnl >= 0 ? 'positive' : 'negative'}">
+                            P&L: $${pos.pnl.toFixed(2)}
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function handleTradeOpened(message) {
+            addEventLog('trade-opened', `🟢 Opened ${message.data.symbol} ${message.data.side} @ $${message.data.price.toFixed(2)}`);
+            if (message.voice_text) {
+                rickVoice.speak(message.voice_text);
+            }
+        }
+        
+        function handleTradeClosed(message) {
+            addEventLog('trade-closed', `🔴 Closed ${message.data.symbol} - P&L: $${message.data.pnl.toFixed(2)} (${message.data.reason})`);
+            if (message.voice_text) {
+                rickVoice.speak(message.voice_text);
+            }
+        }
+        
+        function handlePhaseGraduation(message) {
+            addEventLog('phase-graduation', `🎓 GRADUATED TO PHASE ${message.data.new_phase}!`);
+            if (message.voice_text) {
+                rickVoice.speak(message.voice_text, true); // Priority
+            }
+        }
+        
+        function handleGateRejection(message) {
+            addEventLog('gate-rejection', `⚠️  Signal rejected: ${message.data.reason}`);
+        }
+        
+        function handlePriceUpdate(message) {
+            // Could update price tickers if desired
+        }
+        
+        function addEventLog(type, text) {
+            const logEl = document.getElementById('event-log');
+            
+            // Remove "no data" message
+            if (logEl.querySelector('.no-data')) {
+                logEl.innerHTML = '';
+            }
+            
+            const eventItem = document.createElement('div');
+            eventItem.className = `event-item ${type}`;
+            
+            const timestamp = new Date().toLocaleTimeString();
+            eventItem.innerHTML = `
+                <div>${text}</div>
+                <div class="event-timestamp">${timestamp}</div>
+            `;
+            
+            logEl.insertBefore(eventItem, logEl.firstChild);
+            
+            // Keep only last 50 events
+            while (logEl.children.length > 50) {
+                logEl.removeChild(logEl.lastChild);
+            }
+        }
+        
+        function clearEventLog(message) {
+            const logEl = document.getElementById('event-log');
+            logEl.innerHTML = '';
+            addEventLog('connection', message);
+        }
+        
+        // Connect on load
+        connectWebSocket();
+    </script>
+</body>
+</html>

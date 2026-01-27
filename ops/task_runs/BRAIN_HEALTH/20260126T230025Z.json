@@ -1,0 +1,13 @@
+{
+  "task_name": "BRAIN_HEALTH",
+  "timestamp": "20260126T230025Z",
+  "command": "/home/ing/RICK/MULTI_BROKER_PHOENIX/tools/brain_health.sh",
+  "script_path": "/home/ing/RICK/MULTI_BROKER_PHOENIX/tools/brain_health.sh",
+  "script_hash": "e6e9a6e69b5b4ce1297edd47bf5f13cfd24d4eb5337511d878394221d1c83599",
+  "exit_code": 0,
+  "commit": "bc8cf753d7d57aa08ff61dc7d76b52814c7e9e0b",
+  "toggles_hash": "136e7c302f9c8b2c512103d536574f754c2e4d9dfda7d8cdd0445a2b0805195b",
+  "log_file": "/home/ing/RICK/MULTI_BROKER_PHOENIX/ops/task_runs/BRAIN_HEALTH/20260126T230025Z.log",
+  "summary_file": "/home/ing/RICK/MULTI_BROKER_PHOENIX/ops/task_runs/BRAIN_HEALTH/20260126T230025Z.summary.txt",
+  "summary_hash": "93429fe5c47a4eb0f10586cc6fb5acd8ec7e4af5ce06e4d6c664e571ccf3ec37"
+}

@@ -1,0 +1,14 @@
+=== TASK RUNNER START ===
+task_name=AI_HEALTH
+timestamp=20260126T120224Z
+command=/home/ing/RICK/MULTI_BROKER_PHOENIX/tools/ai_health.sh
+script_path=/home/ing/RICK/MULTI_BROKER_PHOENIX/tools/ai_health.sh
+script_hash=9b23af30829179b2ef2c9e52ad8ee169f8ed228d75e3feb84008e7ff2dc2c5a5
+commit=bc8cf753d7d57aa08ff61dc7d76b52814c7e9e0b
+toggles_hash=136e7c302f9c8b2c512103d536574f754c2e4d9dfda7d8cdd0445a2b0805195b
+==========================
+timestamp=2026-01-26T12:02:24Z
+commit=bc8cf753d7d57aa08ff61dc7d76b52814c7e9e0b
+toggles_hash=136e7c302f9c8b2c512103d536574f754c2e4d9dfda7d8cdd0445a2b0805195b
+{"ai_ok": true, "chosen": "ollama", "cloud_ok": true, "healthy_count": 2, "local_ok": true, "min_seats": 1, "snapshot": {"deepseek": {"code": 401, "latency_ms": 808, "ok": false, "reason": "HTTP_401"}, "grok": {"code": 200, "latency_ms": 232, "ok": true, "reason": "OK"}, "ollama": {"code": 200, "latency_ms": 7, "model": "llama3.1:8b", "models": ["codellama:13b-instruct", "llama3.1:8b"], "ok": true, "reason": "OK", "timestamp": 1769428944.362567, "url": "http://127.0.0.1:11434"}}}
+PASS

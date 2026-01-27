@@ -1,0 +1,11 @@
+{
+  "task_name": "RBOTZILLA_STATUS",
+  "timestamp": "20260123T063723Z",
+  "command": "/home/ing/RICK/MULTI_BROKER_PHOENIX/tools/rbot_status.sh",
+  "exit_code": 0,
+  "commit": "ca5f9a63cb6ee0c72e9661ba887a0affaeecafc9",
+  "toggles_hash": "8e181dee01f846a08e884b58b6d54685371204378a8fef72edc0e126cd66df33",
+  "log_file": "/home/ing/RICK/MULTI_BROKER_PHOENIX/ops/task_runs/RBOTZILLA_STATUS/20260123T063723Z.log",
+  "summary_file": "/home/ing/RICK/MULTI_BROKER_PHOENIX/ops/task_runs/RBOTZILLA_STATUS/20260123T063723Z.summary.txt",
+  "summary_hash": "b65e16a5b1aef7f9ee4dad561e3f00f809f8e9a2711c2b3332a08549f4a39215"
+}

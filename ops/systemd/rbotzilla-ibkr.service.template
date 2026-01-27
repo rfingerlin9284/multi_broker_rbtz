@@ -1,0 +1,22 @@
+[Unit]
+Description=RBOTZILLA IBKR Broker
+After=network.target rbotzilla-orchestrator.service
+Requires=rbotzilla-orchestrator.service
+
+[Service]
+Type=simple
+User=%USER%
+Group=%USER%
+WorkingDirectory=%REPO_ROOT%
+Environment="PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+Environment="PYTHONPATH=%REPO_ROOT%"
+Environment="BROKER_IBKR_ENABLED=1"
+ExecStartPre=/bin/bash %REPO_ROOT%/tools/env_load.sh
+ExecStart=%REPO_ROOT%/tools/start_broker.sh ibkr
+Restart=on-failure
+RestartSec=10
+StandardOutput=append:%REPO_ROOT%/logs/ibkr/service.log
+StandardError=append:%REPO_ROOT%/logs/ibkr/service.error.log
+
+[Install]
+WantedBy=multi-user.target

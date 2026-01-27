@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="/home/ing/RICK/MULTI_BROKER_PHOENIX"
+APP="$ROOT/MULTI_BROKER_PHOENIX"
+VENV="$ROOT/.venv"
+TOGGLES="$ROOT/config/toggles.env"
+ENVFILE="$ROOT/.env"
+LOGDIR="$ROOT/logs"
+PIDFILE="$LOGDIR/engine.pid"
+ENGINE_LOG="$LOGDIR/engine_headless.log"
+
+mkdir -p "$LOGDIR"
+
+if [ ! -f "$ENVFILE" ]; then
+  if [ -f "$ROOT/.env.example" ]; then
+    cp "$ROOT/.env.example" "$ENVFILE"
+  else
+    echo "ERROR: Missing $ENVFILE and no $ROOT/.env.example"
+    exit 1
+  fi
+fi
+
+if [ ! -d "$VENV" ]; then
+  python3 -m venv "$VENV"
+fi
+# shellcheck disable=SC1090
+source "$VENV/bin/activate"
+
+python3 - <<'PY'
+import site, os, pathlib
+pth_dir = site.getsitepackages()[0]
+pth_path = os.path.join(pth_dir, "multi_broker_phoenix_repo.pth")
+project_path = "/home/ing/RICK/MULTI_BROKER_PHOENIX/MULTI_BROKER_PHOENIX"
+pathlib.Path(pth_path).write_text(project_path + "\n")
+print("OK: wrote", pth_path)
+PY
+
+if [ ! -f "$TOGGLES" ]; then
+  echo "ERROR: Missing toggles: $TOGGLES"
+  exit 1
+fi
+
+# shellcheck disable=SC1090
+set -a
+source "$TOGGLES"
+set +a
+
+# Fail-fast if required keys are empty (you demanded real votes)
+grep -q '^XAI_API_KEY=.\+' "$ENVFILE" || { echo "ERROR: XAI_API_KEY is empty in $ENVFILE"; exit 2; }
+grep -q '^DEEPSEEK_API_KEY=.\+' "$ENVFILE" || { echo "ERROR: DEEPSEEK_API_KEY is empty in $ENVFILE"; exit 2; }
+
+if [ -f "$PIDFILE" ]; then
+  old="$(cat "$PIDFILE" || true)"
+  if [ -n "${old:-}" ] && kill -0 "$old" 2>/dev/null; then
+    echo "Already running: pid=$old"
+    exit 0
+  fi
+  rm -f "$PIDFILE"
+fi
+
+export ENABLE_OANDA="${ENABLE_OANDA:-1}"
+export ENABLE_COINBASE="${ENABLE_COINBASE:-0}"
+export ENABLE_IBKR="${ENABLE_IBKR:-0}"
+export TRADING_MODE="${TRADING_MODE:-PAPER}"
+export PRACTICE_TRADING_ALLOWED="${PRACTICE_TRADING_ALLOWED:-1}"
+export ALLOW_PRACTICE_ORDERS="${ALLOW_PRACTICE_ORDERS:-1}"
+export CONFIRM_PRACTICE_ORDER="${CONFIRM_PRACTICE_ORDER:-0}"
+export DISABLE_OPENAI="${DISABLE_OPENAI:-true}"
+export DISABLE_BROWSER_HIVE="${DISABLE_BROWSER_HIVE:-true}"
+export REQUIRE_XAI="${REQUIRE_XAI:-1}"
+export REQUIRE_DEEPSEEK="${REQUIRE_DEEPSEEK:-1}"
+
+MODE="${HEADLESS_MODE:-oanda-only}"
+
+echo "Starting engine in background..."
+echo "  mode=$MODE"
+echo "  log=$ENGINE_LOG"
+
+nohup "$ROOT/tools/py_venv.sh" -u "$APP/tools/run_headless.py" --mode "$MODE" \
+  >> "$ENGINE_LOG" 2>&1 &
+
+echo $! > "$PIDFILE"
+echo "STARTED: pid=$(cat "$PIDFILE")"
+echo "TAIL: tail -n 200 -f $ENGINE_LOG"

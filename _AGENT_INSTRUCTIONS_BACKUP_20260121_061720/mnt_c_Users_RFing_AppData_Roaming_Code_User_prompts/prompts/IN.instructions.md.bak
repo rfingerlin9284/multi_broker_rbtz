@@ -1,0 +1,18 @@
+```python
+# broker_adapter.py (skeleton)
+from abc import ABC, abstractmethod
+
+class BrokerAdapter(ABC):
+    @abstractmethod
+    def get_candles(self, instrument, granularity, count): pass
+    @abstractmethod
+    def get_account_info(self): pass
+    @abstractmethod
+    def place_order(self, order_spec, dry_run=True): pass
+    @abstractmethod
+    def cancel_order(self, order_id): pass
+    @abstractmethod
+    def get_current_trades(self): pass
+
+# OANDA and Coinbase adapters implement these methods and translate instrument names, fees, tick sizes.
+```

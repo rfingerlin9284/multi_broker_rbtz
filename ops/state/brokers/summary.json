@@ -1,0 +1,32 @@
+{
+  "timestamp": "2026-01-27T15:19:17.692190+00:00",
+  "epoch": 1769527157.692197,
+  "orchestrator_running": true,
+  "brokers": {
+    "oanda": {
+      "name": "oanda",
+      "enabled": true,
+      "pid": null,
+      "heartbeat_file": "/home/ing/RICK/MULTI_BROKER_PHOENIX/ops/state/brokers/oanda.json",
+      "state": "ACTIVE",
+      "fail_count": 1,
+      "last_error": "PLACEMENT_FAILED: GBP_USD reason=INSUFFICIENT_MARGIN",
+      "last_heartbeat": "2026-01-27T15:18:38.806454+00:00",
+      "heartbeat_age_sec": 38.885759
+    },
+    "coinbase": {
+      "name": "coinbase",
+      "enabled": false,
+      "pid": null,
+      "heartbeat_file": "/home/ing/RICK/MULTI_BROKER_PHOENIX/ops/state/brokers/coinbase.json",
+      "state": "NO_HEARTBEAT"
+    },
+    "ibkr": {
+      "name": "ibkr",
+      "enabled": false,
+      "pid": null,
+      "heartbeat_file": "/home/ing/RICK/MULTI_BROKER_PHOENIX/ops/state/brokers/ibkr.json",
+      "state": "NO_HEARTBEAT"
+    }
+  }
+}

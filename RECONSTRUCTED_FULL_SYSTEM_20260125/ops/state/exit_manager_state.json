@@ -1,0 +1,21 @@
+{
+  "last_tick_utc": "2026-01-27T01:28:36.334135Z",
+  "open_trades_count": 0,
+  "trailing_enabled": true,
+  "max_hold_hours": 8.0,
+  "last_check": {
+    "checked": 0,
+    "profit_locks": 0,
+    "trailing_updates": 0,
+    "time_closes": 0,
+    "hard_time_closes": 0,
+    "soft_time_warnings": 0,
+    "profit_giveback_exits": 0,
+    "profit_giveback_tightens": 0,
+    "errors": []
+  },
+  "profit_locked": [],
+  "trailing_hwm": {},
+  "max_profit_pips": {},
+  "updated_at": "2026-01-27T01:28:36.334141Z"
+}

@@ -1,0 +1,512 @@
+{
+  "failures": [
+    {
+      "detail": {
+        "acct": true,
+        "base": true,
+        "error": "missing_oanda_env",
+        "ok": false,
+        "token": false
+      },
+      "ts": "2026-01-27T15:14:27Z",
+      "type": "OANDA_FAIL"
+    },
+    {
+      "detail": {
+        "hit": [
+          "/home/ing/RICK/MULTI_BROKER_PHOENIX/logs/engine_headless.log",
+          "401"
+        ]
+      },
+      "ts": "2026-01-27T15:14:27Z",
+      "type": "LOG_CRITICAL"
+    },
+    {
+      "detail": {
+        "acct": true,
+        "base": true,
+        "error": "missing_oanda_env",
+        "ok": false,
+        "token": false
+      },
+      "ts": "2026-01-27T15:14:38Z",
+      "type": "OANDA_FAIL"
+    },
+    {
+      "detail": {
+        "hit": [
+          "/home/ing/RICK/MULTI_BROKER_PHOENIX/logs/engine_headless.log",
+          "401"
+        ]
+      },
+      "ts": "2026-01-27T15:14:38Z",
+      "type": "LOG_CRITICAL"
+    },
+    {
+      "detail": {
+        "acct": true,
+        "base": true,
+        "error": "missing_oanda_env",
+        "ok": false,
+        "token": false
+      },
+      "ts": "2026-01-27T15:14:52Z",
+      "type": "OANDA_FAIL"
+    },
+    {
+      "detail": {
+        "hit": [
+          "/home/ing/RICK/MULTI_BROKER_PHOENIX/logs/engine_headless.log",
+          "401"
+        ]
+      },
+      "ts": "2026-01-27T15:14:52Z",
+      "type": "LOG_CRITICAL"
+    },
+    {
+      "detail": {
+        "acct": true,
+        "base": true,
+        "error": "missing_oanda_env",
+        "ok": false,
+        "token": false
+      },
+      "ts": "2026-01-27T15:15:03Z",
+      "type": "OANDA_FAIL"
+    },
+    {
+      "detail": {
+        "hit": [
+          "/home/ing/RICK/MULTI_BROKER_PHOENIX/logs/engine_headless.log",
+          "401"
+        ]
+      },
+      "ts": "2026-01-27T15:15:03Z",
+      "type": "LOG_CRITICAL"
+    },
+    {
+      "detail": {
+        "acct": true,
+        "base": true,
+        "error": "missing_oanda_env",
+        "ok": false,
+        "token": false
+      },
+      "ts": "2026-01-27T15:15:14Z",
+      "type": "OANDA_FAIL"
+    },
+    {
+      "detail": {
+        "hit": [
+          "/home/ing/RICK/MULTI_BROKER_PHOENIX/logs/engine_headless.log",
+          "401"
+        ]
+      },
+      "ts": "2026-01-27T15:15:14Z",
+      "type": "LOG_CRITICAL"
+    },
+    {
+      "detail": {
+        "acct": true,
+        "base": true,
+        "error": "missing_oanda_env",
+        "ok": false,
+        "token": false
+      },
+      "ts": "2026-01-27T15:15:28Z",
+      "type": "OANDA_FAIL"
+    },
+    {
+      "detail": {
+        "hit": [
+          "/home/ing/RICK/MULTI_BROKER_PHOENIX/logs/engine_headless.log",
+          "401"
+        ]
+      },
+      "ts": "2026-01-27T15:15:28Z",
+      "type": "LOG_CRITICAL"
+    },
+    {
+      "detail": {
+        "acct": true,
+        "base": true,
+        "error": "missing_oanda_env",
+        "ok": false,
+        "token": false
+      },
+      "ts": "2026-01-27T15:15:38Z",
+      "type": "OANDA_FAIL"
+    },
+    {
+      "detail": {
+        "hit": [
+          "/home/ing/RICK/MULTI_BROKER_PHOENIX/logs/engine_headless.log",
+          "401"
+        ]
+      },
+      "ts": "2026-01-27T15:15:38Z",
+      "type": "LOG_CRITICAL"
+    },
+    {
+      "detail": {
+        "acct": true,
+        "base": true,
+        "error": "missing_oanda_env",
+        "ok": false,
+        "token": false
+      },
+      "ts": "2026-01-27T15:15:49Z",
+      "type": "OANDA_FAIL"
+    },
+    {
+      "detail": {
+        "hit": [
+          "/home/ing/RICK/MULTI_BROKER_PHOENIX/logs/engine_headless.log",
+          "401"
+        ]
+      },
+      "ts": "2026-01-27T15:15:49Z",
+      "type": "LOG_CRITICAL"
+    },
+    {
+      "detail": {
+        "acct": true,
+        "base": true,
+        "error": "missing_oanda_env",
+        "ok": false,
+        "token": false
+      },
+      "ts": "2026-01-27T15:16:03Z",
+      "type": "OANDA_FAIL"
+    },
+    {
+      "detail": {
+        "hit": [
+          "/home/ing/RICK/MULTI_BROKER_PHOENIX/logs/engine_headless.log",
+          "401"
+        ]
+      },
+      "ts": "2026-01-27T15:16:03Z",
+      "type": "LOG_CRITICAL"
+    },
+    {
+      "detail": {
+        "acct": true,
+        "base": true,
+        "error": "missing_oanda_env",
+        "ok": false,
+        "token": false
+      },
+      "ts": "2026-01-27T15:16:14Z",
+      "type": "OANDA_FAIL"
+    },
+    {
+      "detail": {
+        "hit": [
+          "/home/ing/RICK/MULTI_BROKER_PHOENIX/logs/engine_headless.log",
+          "401"
+        ]
+      },
+      "ts": "2026-01-27T15:16:14Z",
+      "type": "LOG_CRITICAL"
+    },
+    {
+      "detail": {
+        "acct": true,
+        "base": true,
+        "error": "missing_oanda_env",
+        "ok": false,
+        "token": false
+      },
+      "ts": "2026-01-27T15:16:25Z",
+      "type": "OANDA_FAIL"
+    },
+    {
+      "detail": {
+        "hit": [
+          "/home/ing/RICK/MULTI_BROKER_PHOENIX/logs/engine_headless.log",
+          "401"
+        ]
+      },
+      "ts": "2026-01-27T15:16:25Z",
+      "type": "LOG_CRITICAL"
+    },
+    {
+      "detail": {
+        "acct": true,
+        "base": true,
+        "error": "missing_oanda_env",
+        "ok": false,
+        "token": false
+      },
+      "ts": "2026-01-27T15:16:39Z",
+      "type": "OANDA_FAIL"
+    },
+    {
+      "detail": {
+        "hit": [
+          "/home/ing/RICK/MULTI_BROKER_PHOENIX/logs/engine_headless.log",
+          "401"
+        ]
+      },
+      "ts": "2026-01-27T15:16:39Z",
+      "type": "LOG_CRITICAL"
+    },
+    {
+      "detail": {
+        "acct": true,
+        "base": true,
+        "error": "missing_oanda_env",
+        "ok": false,
+        "token": false
+      },
+      "ts": "2026-01-27T15:16:50Z",
+      "type": "OANDA_FAIL"
+    },
+    {
+      "detail": {
+        "hit": [
+          "/home/ing/RICK/MULTI_BROKER_PHOENIX/logs/engine_headless.log",
+          "401"
+        ]
+      },
+      "ts": "2026-01-27T15:16:50Z",
+      "type": "LOG_CRITICAL"
+    },
+    {
+      "detail": {
+        "acct": true,
+        "base": true,
+        "error": "missing_oanda_env",
+        "ok": false,
+        "token": false
+      },
+      "ts": "2026-01-27T15:17:00Z",
+      "type": "OANDA_FAIL"
+    },
+    {
+      "detail": {
+        "hit": [
+          "/home/ing/RICK/MULTI_BROKER_PHOENIX/logs/engine_headless.log",
+          "401"
+        ]
+      },
+      "ts": "2026-01-27T15:17:00Z",
+      "type": "LOG_CRITICAL"
+    },
+    {
+      "detail": {
+        "acct": true,
+        "base": true,
+        "error": "missing_oanda_env",
+        "ok": false,
+        "token": false
+      },
+      "ts": "2026-01-27T15:17:14Z",
+      "type": "OANDA_FAIL"
+    },
+    {
+      "detail": {
+        "hit": [
+          "/home/ing/RICK/MULTI_BROKER_PHOENIX/logs/engine_headless.log",
+          "401"
+        ]
+      },
+      "ts": "2026-01-27T15:17:14Z",
+      "type": "LOG_CRITICAL"
+    },
+    {
+      "detail": {
+        "acct": true,
+        "base": true,
+        "error": "missing_oanda_env",
+        "ok": false,
+        "token": false
+      },
+      "ts": "2026-01-27T15:17:25Z",
+      "type": "OANDA_FAIL"
+    },
+    {
+      "detail": {
+        "hit": [
+          "/home/ing/RICK/MULTI_BROKER_PHOENIX/logs/engine_headless.log",
+          "401"
+        ]
+      },
+      "ts": "2026-01-27T15:17:25Z",
+      "type": "LOG_CRITICAL"
+    },
+    {
+      "detail": {
+        "acct": true,
+        "base": true,
+        "error": "missing_oanda_env",
+        "ok": false,
+        "token": false
+      },
+      "ts": "2026-01-27T15:17:36Z",
+      "type": "OANDA_FAIL"
+    },
+    {
+      "detail": {
+        "hit": [
+          "/home/ing/RICK/MULTI_BROKER_PHOENIX/logs/engine_headless.log",
+          "401"
+        ]
+      },
+      "ts": "2026-01-27T15:17:36Z",
+      "type": "LOG_CRITICAL"
+    },
+    {
+      "detail": {
+        "acct": true,
+        "base": true,
+        "error": "missing_oanda_env",
+        "ok": false,
+        "token": false
+      },
+      "ts": "2026-01-27T15:17:50Z",
+      "type": "OANDA_FAIL"
+    },
+    {
+      "detail": {
+        "hit": [
+          "/home/ing/RICK/MULTI_BROKER_PHOENIX/logs/engine_headless.log",
+          "401"
+        ]
+      },
+      "ts": "2026-01-27T15:17:50Z",
+      "type": "LOG_CRITICAL"
+    },
+    {
+      "detail": {
+        "acct": true,
+        "base": true,
+        "error": "missing_oanda_env",
+        "ok": false,
+        "token": false
+      },
+      "ts": "2026-01-27T15:18:01Z",
+      "type": "OANDA_FAIL"
+    },
+    {
+      "detail": {
+        "hit": [
+          "/home/ing/RICK/MULTI_BROKER_PHOENIX/logs/engine_headless.log",
+          "401"
+        ]
+      },
+      "ts": "2026-01-27T15:18:01Z",
+      "type": "LOG_CRITICAL"
+    },
+    {
+      "detail": {
+        "acct": true,
+        "base": true,
+        "error": "missing_oanda_env",
+        "ok": false,
+        "token": false
+      },
+      "ts": "2026-01-27T15:18:11Z",
+      "type": "OANDA_FAIL"
+    },
+    {
+      "detail": {
+        "hit": [
+          "/home/ing/RICK/MULTI_BROKER_PHOENIX/logs/engine_headless.log",
+          "401"
+        ]
+      },
+      "ts": "2026-01-27T15:18:11Z",
+      "type": "LOG_CRITICAL"
+    },
+    {
+      "detail": {
+        "acct": true,
+        "base": true,
+        "error": "missing_oanda_env",
+        "ok": false,
+        "token": false
+      },
+      "ts": "2026-01-27T15:18:26Z",
+      "type": "OANDA_FAIL"
+    },
+    {
+      "detail": {
+        "hit": [
+          "/home/ing/RICK/MULTI_BROKER_PHOENIX/logs/engine_headless.log",
+          "401"
+        ]
+      },
+      "ts": "2026-01-27T15:18:26Z",
+      "type": "LOG_CRITICAL"
+    },
+    {
+      "detail": {
+        "acct": true,
+        "base": true,
+        "error": "missing_oanda_env",
+        "ok": false,
+        "token": false
+      },
+      "ts": "2026-01-27T15:18:36Z",
+      "type": "OANDA_FAIL"
+    },
+    {
+      "detail": {
+        "hit": [
+          "/home/ing/RICK/MULTI_BROKER_PHOENIX/logs/engine_headless.log",
+          "401"
+        ]
+      },
+      "ts": "2026-01-27T15:18:36Z",
+      "type": "LOG_CRITICAL"
+    },
+    {
+      "detail": {
+        "acct": true,
+        "base": true,
+        "error": "missing_oanda_env",
+        "ok": false,
+        "token": false
+      },
+      "ts": "2026-01-27T15:18:47Z",
+      "type": "OANDA_FAIL"
+    },
+    {
+      "detail": {
+        "hit": [
+          "/home/ing/RICK/MULTI_BROKER_PHOENIX/logs/engine_headless.log",
+          "401"
+        ]
+      },
+      "ts": "2026-01-27T15:18:47Z",
+      "type": "LOG_CRITICAL"
+    },
+    {
+      "detail": {
+        "acct": true,
+        "base": true,
+        "error": "missing_oanda_env",
+        "ok": false,
+        "token": false
+      },
+      "ts": "2026-01-27T15:19:23Z",
+      "type": "OANDA_FAIL"
+    },
+    {
+      "detail": {
+        "hit": [
+          "/home/ing/RICK/MULTI_BROKER_PHOENIX/logs/engine_headless.log",
+          "401"
+        ]
+      },
+      "ts": "2026-01-27T15:19:23Z",
+      "type": "LOG_CRITICAL"
+    }
+  ],
+  "last_env_hash": "6ede236c8833dd08471048b0f8899e7db537e6dfa44d009a6f992916d2e5496c",
+  "last_incident": "/home/ing/RICK/MULTI_BROKER_PHOENIX/ops_guard/incidents/incident_20260122_082812.json",
+  "last_transition": "2026-01-22T08:28:11Z",
+  "mode": "RED"
+}

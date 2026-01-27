@@ -1,0 +1,21 @@
+[Unit]
+Description=RBOTZILLA Multi-Broker Orchestrator
+After=network.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=%USER%
+Group=%USER%
+WorkingDirectory=%REPO_ROOT%
+Environment="PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+Environment="PYTHONPATH=%REPO_ROOT%"
+ExecStartPre=/bin/bash %REPO_ROOT%/tools/env_load.sh
+ExecStart=/usr/bin/python3 -m multi_broker_phoenix.core.orchestrator
+Restart=on-failure
+RestartSec=10
+StandardOutput=append:%REPO_ROOT%/logs/orchestrator.log
+StandardError=append:%REPO_ROOT%/logs/orchestrator.error.log
+
+[Install]
+WantedBy=multi-user.target

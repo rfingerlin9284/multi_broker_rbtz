@@ -1,0 +1,13 @@
+{
+  "ok": true,
+  "code": 200,
+  "reason": "OK",
+  "latency_ms": 1,
+  "model": "llama3.1:8b",
+  "url": "http://127.0.0.1:11434",
+  "models": [
+    "codellama:13b-instruct",
+    "llama3.1:8b"
+  ],
+  "timestamp": 1769527115.5037396
+}

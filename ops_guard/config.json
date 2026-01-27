@@ -1,0 +1,77 @@
+{
+  "repo_root": "/home/ing/RICK/MULTI_BROKER_PHOENIX",
+  "canonical_env": "/home/ing/RICK/MULTI_BROKER_PHOENIX/.env",
+  "env_lock": true,
+  "env_quarantine_dir": "/home/ing/RICK/MULTI_BROKER_PHOENIX/ops_guard/env_quarantine",
+  "state_file": "/home/ing/RICK/MULTI_BROKER_PHOENIX/ops_guard/data/circuit_state.json",
+  "incident_dir": "/home/ing/RICK/MULTI_BROKER_PHOENIX/ops_guard/incidents",
+  "ops_log": "/home/ing/RICK/MULTI_BROKER_PHOENIX/ops_guard/logs/ops_guard.log",
+  "hourly_report": "/home/ing/RICK/MULTI_BROKER_PHOENIX/ops_guard/logs/hourly_report.log",
+
+  "entry_services": [
+  "run_headless.service",
+  "engine_headless.service",
+  "rbotzilla-engine.service",
+  "phoenix-engine.service"
+],
+  "manage_services": [
+  "position_monitor.service",
+  "oanda_position_monitor.service",
+  "rbotzilla-risk.service",
+  "phoenix-risk.service"
+],
+
+  "log_files": [
+  "/home/ing/RICK/MULTI_BROKER_PHOENIX/engine_headless.log",
+  "/tmp/engine_fresh_restart.log",
+  "/tmp/engine_headless.log",
+  "/home/ing/RICK/MULTI_BROKER_PHOENIX/logs/engine_headless.log",
+  "/home/ing/RICK/MULTI_BROKER_PHOENIX/logs/engine.log"
+],
+
+  "critical_patterns": [
+    "401",
+    "403",
+    "INVALID_TOKEN",
+    "Authorization",
+    "auth",
+    "permission",
+    "Account not found",
+    "OCO",
+    "one cancels other",
+    "rejected",
+    "REJECT",
+    "insufficient",
+    "MARGIN",
+    "Margin Available: 0",
+    "MarginAvailable: 0",
+    "ConnectionError",
+    "ReadTimeout",
+    "Timeout",
+    "Disconnected",
+    "Connection lost",
+    "HTTPSConnectionPool"
+  ],
+
+  "noncritical_patterns": [
+    "DeprecationWarning",
+    "favicon.ico",
+    "404 GET /",
+    "retrying in"
+  ],
+
+  "failure_threshold_red": 3,
+  "failure_window_seconds": 300,
+
+  "oanda": {
+    "enabled": true,
+    "practice_api_base_default": "https://api-fxpractice.oanda.com",
+    "min_margin_available_usd": 2.00
+  },
+
+  "telegram": {
+    "enabled": false,
+    "bot_token_env": "TELEGRAM_BOT_TOKEN",
+    "chat_id_env": "TELEGRAM_CHAT_ID"
+  }
+}

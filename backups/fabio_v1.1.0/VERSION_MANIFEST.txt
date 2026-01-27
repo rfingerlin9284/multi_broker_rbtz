@@ -1,0 +1,6 @@
+FABIO AAA FULL v1.1.0
+Backup Date: Sat Jan  3 17:38:03 EST 2026
+Strategy Hash: fb2e79170c7b509605ffbc63b9ad60e7
+RSI Threshold: 40
+Performance: 167 trades @ 64.7% win rate
+Status: Production Ready

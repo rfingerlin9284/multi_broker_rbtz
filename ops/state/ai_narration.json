@@ -1,0 +1,760 @@
+{
+  "current": {
+    "timestamp": "2026-01-27T15:19:20.086956Z",
+    "symbol": "EUR_USD",
+    "direction": "BUY",
+    "entry_price": 1.19678,
+    "decision": "APPROVE",
+    "consensus": "53%",
+    "reasoning": "BUY consensus: 100%",
+    "votes": [
+      {
+        "ai": "DeepSeek",
+        "signal": "BUY",
+        "confidence": "65%",
+        "reasoning": ""
+      },
+      {
+        "ai": "MultiIndicator",
+        "signal": "BUY",
+        "confidence": "40%",
+        "reasoning": ""
+      }
+    ],
+    "indicators_scanned": [
+      "EMA(5): 1.19685",
+      "EMA(21): 1.19621",
+      "RSI(14): calculated",
+      "Momentum: analyzed",
+      "Volatility: assessed"
+    ],
+    "strategies_checked": [
+      "fabio_aaa_full (EMA crossover + RSI momentum)",
+      "bullish_regime (trend following)",
+      "bearish_regime (counter-trend)",
+      "sideways_regime (range trading)"
+    ]
+  },
+  "history": [
+    {
+      "timestamp": "2026-01-27T14:36:22.873190Z",
+      "symbol": "GBP_USD",
+      "direction": "BUY",
+      "entry_price": 1.376455,
+      "decision": "APPROVE",
+      "consensus": "53%",
+      "reasoning": "BUY consensus: 100%",
+      "votes": [
+        {
+          "ai": "DeepSeek",
+          "signal": "BUY",
+          "confidence": "65%",
+          "reasoning": ""
+        },
+        {
+          "ai": "MultiIndicator",
+          "signal": "BUY",
+          "confidence": "40%",
+          "reasoning": ""
+        }
+      ],
+      "indicators_scanned": [
+        "EMA(5): 1.37608",
+        "EMA(21): 1.37492",
+        "RSI(14): calculated",
+        "Momentum: analyzed",
+        "Volatility: assessed"
+      ],
+      "strategies_checked": [
+        "fabio_aaa_full (EMA crossover + RSI momentum)",
+        "bullish_regime (trend following)",
+        "bearish_regime (counter-trend)",
+        "sideways_regime (range trading)"
+      ]
+    },
+    {
+      "timestamp": "2026-01-27T14:40:21.959863Z",
+      "symbol": "AUD_USD",
+      "direction": "BUY",
+      "entry_price": 0.695935,
+      "decision": "APPROVE",
+      "consensus": "53%",
+      "reasoning": "BUY consensus: 100%",
+      "votes": [
+        {
+          "ai": "DeepSeek",
+          "signal": "BUY",
+          "confidence": "65%",
+          "reasoning": ""
+        },
+        {
+          "ai": "MultiIndicator",
+          "signal": "BUY",
+          "confidence": "40%",
+          "reasoning": ""
+        }
+      ],
+      "indicators_scanned": [
+        "EMA(5): 0.69589",
+        "EMA(21): 0.69564",
+        "RSI(14): calculated",
+        "Momentum: analyzed",
+        "Volatility: assessed"
+      ],
+      "strategies_checked": [
+        "fabio_aaa_full (EMA crossover + RSI momentum)",
+        "bullish_regime (trend following)",
+        "bearish_regime (counter-trend)",
+        "sideways_regime (range trading)"
+      ]
+    },
+    {
+      "timestamp": "2026-01-27T14:42:39.253693Z",
+      "symbol": "USD_JPY",
+      "direction": "BUY",
+      "entry_price": 153.1105,
+      "decision": "APPROVE",
+      "consensus": "43%",
+      "reasoning": "BUY consensus: 50%",
+      "votes": [
+        {
+          "ai": "DeepSeek",
+          "signal": "BUY",
+          "confidence": "45%",
+          "reasoning": ""
+        },
+        {
+          "ai": "MultiIndicator",
+          "signal": "SELL",
+          "confidence": "40%",
+          "reasoning": ""
+        }
+      ],
+      "indicators_scanned": [
+        "EMA(5): 153.06530",
+        "EMA(21): 153.03614",
+        "RSI(14): calculated",
+        "Momentum: analyzed",
+        "Volatility: assessed"
+      ],
+      "strategies_checked": [
+        "fabio_aaa_full (EMA crossover + RSI momentum)",
+        "bullish_regime (trend following)",
+        "bearish_regime (counter-trend)",
+        "sideways_regime (range trading)"
+      ]
+    },
+    {
+      "timestamp": "2026-01-27T14:47:08.580382Z",
+      "symbol": "USD_JPY",
+      "direction": "BUY",
+      "entry_price": 153.26049999999998,
+      "decision": "APPROVE",
+      "consensus": "43%",
+      "reasoning": "BUY consensus: 100%",
+      "votes": [
+        {
+          "ai": "DeepSeek",
+          "signal": "BUY",
+          "confidence": "45%",
+          "reasoning": ""
+        },
+        {
+          "ai": "MultiIndicator",
+          "signal": "BUY",
+          "confidence": "40%",
+          "reasoning": ""
+        }
+      ],
+      "indicators_scanned": [
+        "EMA(5): 153.21400",
+        "EMA(21): 153.09774",
+        "RSI(14): calculated",
+        "Momentum: analyzed",
+        "Volatility: assessed"
+      ],
+      "strategies_checked": [
+        "fabio_aaa_full (EMA crossover + RSI momentum)",
+        "bullish_regime (trend following)",
+        "bearish_regime (counter-trend)",
+        "sideways_regime (range trading)"
+      ]
+    },
+    {
+      "timestamp": "2026-01-27T14:54:34.340567Z",
+      "symbol": "USD_CAD",
+      "direction": "BUY",
+      "entry_price": 1.364195,
+      "decision": "APPROVE",
+      "consensus": "43%",
+      "reasoning": "BUY consensus: 50%",
+      "votes": [
+        {
+          "ai": "DeepSeek",
+          "signal": "BUY",
+          "confidence": "45%",
+          "reasoning": ""
+        },
+        {
+          "ai": "MultiIndicator",
+          "signal": "SELL",
+          "confidence": "40%",
+          "reasoning": ""
+        }
+      ],
+      "indicators_scanned": [
+        "EMA(5): 1.36395",
+        "EMA(21): 1.36368",
+        "RSI(14): calculated",
+        "Momentum: analyzed",
+        "Volatility: assessed"
+      ],
+      "strategies_checked": [
+        "fabio_aaa_full (EMA crossover + RSI momentum)",
+        "bullish_regime (trend following)",
+        "bearish_regime (counter-trend)",
+        "sideways_regime (range trading)"
+      ]
+    },
+    {
+      "timestamp": "2026-01-27T14:56:13.691809Z",
+      "symbol": "GBP_USD",
+      "direction": "BUY",
+      "entry_price": 1.377005,
+      "decision": "APPROVE",
+      "consensus": "53%",
+      "reasoning": "BUY consensus: 100%",
+      "votes": [
+        {
+          "ai": "DeepSeek",
+          "signal": "BUY",
+          "confidence": "65%",
+          "reasoning": ""
+        },
+        {
+          "ai": "MultiIndicator",
+          "signal": "BUY",
+          "confidence": "40%",
+          "reasoning": ""
+        }
+      ],
+      "indicators_scanned": [
+        "EMA(5): 1.37679",
+        "EMA(21): 1.37683",
+        "RSI(14): calculated",
+        "Momentum: analyzed",
+        "Volatility: assessed"
+      ],
+      "strategies_checked": [
+        "fabio_aaa_full (EMA crossover + RSI momentum)",
+        "bullish_regime (trend following)",
+        "bearish_regime (counter-trend)",
+        "sideways_regime (range trading)"
+      ]
+    },
+    {
+      "timestamp": "2026-01-27T14:57:22.202654Z",
+      "symbol": "GBP_USD",
+      "direction": "BUY",
+      "entry_price": 1.37756,
+      "decision": "APPROVE",
+      "consensus": "53%",
+      "reasoning": "BUY consensus: 100%",
+      "votes": [
+        {
+          "ai": "DeepSeek",
+          "signal": "BUY",
+          "confidence": "65%",
+          "reasoning": ""
+        },
+        {
+          "ai": "MultiIndicator",
+          "signal": "BUY",
+          "confidence": "40%",
+          "reasoning": ""
+        }
+      ],
+      "indicators_scanned": [
+        "EMA(5): 1.37714",
+        "EMA(21): 1.37688",
+        "RSI(14): calculated",
+        "Momentum: analyzed",
+        "Volatility: assessed"
+      ],
+      "strategies_checked": [
+        "fabio_aaa_full (EMA crossover + RSI momentum)",
+        "bullish_regime (trend following)",
+        "bearish_regime (counter-trend)",
+        "sideways_regime (range trading)"
+      ]
+    },
+    {
+      "timestamp": "2026-01-27T14:57:57.668400Z",
+      "symbol": "AUD_USD",
+      "direction": "BUY",
+      "entry_price": 0.696075,
+      "decision": "APPROVE",
+      "consensus": "53%",
+      "reasoning": "BUY consensus: 100%",
+      "votes": [
+        {
+          "ai": "DeepSeek",
+          "signal": "BUY",
+          "confidence": "65%",
+          "reasoning": ""
+        },
+        {
+          "ai": "MultiIndicator",
+          "signal": "BUY",
+          "confidence": "40%",
+          "reasoning": ""
+        }
+      ],
+      "indicators_scanned": [
+        "EMA(5): 0.69605",
+        "EMA(21): 0.69595",
+        "RSI(14): calculated",
+        "Momentum: analyzed",
+        "Volatility: assessed"
+      ],
+      "strategies_checked": [
+        "fabio_aaa_full (EMA crossover + RSI momentum)",
+        "bullish_regime (trend following)",
+        "bearish_regime (counter-trend)",
+        "sideways_regime (range trading)"
+      ]
+    },
+    {
+      "timestamp": "2026-01-27T14:59:40.567661Z",
+      "symbol": "USD_CAD",
+      "direction": "BUY",
+      "entry_price": 1.36395,
+      "decision": "APPROVE",
+      "consensus": "43%",
+      "reasoning": "BUY consensus: 50%",
+      "votes": [
+        {
+          "ai": "DeepSeek",
+          "signal": "BUY",
+          "confidence": "45%",
+          "reasoning": ""
+        },
+        {
+          "ai": "MultiIndicator",
+          "signal": "SELL",
+          "confidence": "40%",
+          "reasoning": ""
+        }
+      ],
+      "indicators_scanned": [
+        "EMA(5): 1.36377",
+        "EMA(21): 1.36379",
+        "RSI(14): calculated",
+        "Momentum: analyzed",
+        "Volatility: assessed"
+      ],
+      "strategies_checked": [
+        "fabio_aaa_full (EMA crossover + RSI momentum)",
+        "bullish_regime (trend following)",
+        "bearish_regime (counter-trend)",
+        "sideways_regime (range trading)"
+      ]
+    },
+    {
+      "timestamp": "2026-01-27T15:01:23.668261Z",
+      "symbol": "EUR_USD",
+      "direction": "BUY",
+      "entry_price": 1.19499,
+      "decision": "APPROVE",
+      "consensus": "53%",
+      "reasoning": "BUY consensus: 100%",
+      "votes": [
+        {
+          "ai": "DeepSeek",
+          "signal": "BUY",
+          "confidence": "65%",
+          "reasoning": ""
+        },
+        {
+          "ai": "MultiIndicator",
+          "signal": "BUY",
+          "confidence": "40%",
+          "reasoning": ""
+        }
+      ],
+      "indicators_scanned": [
+        "EMA(5): 1.19468",
+        "EMA(21): 1.19424",
+        "RSI(14): calculated",
+        "Momentum: analyzed",
+        "Volatility: assessed"
+      ],
+      "strategies_checked": [
+        "fabio_aaa_full (EMA crossover + RSI momentum)",
+        "bullish_regime (trend following)",
+        "bearish_regime (counter-trend)",
+        "sideways_regime (range trading)"
+      ]
+    },
+    {
+      "timestamp": "2026-01-27T15:02:32.227971Z",
+      "symbol": "USD_JPY",
+      "direction": "SELL",
+      "entry_price": 153.0635,
+      "decision": "APPROVE",
+      "consensus": "53%",
+      "reasoning": "SELL consensus: 100%",
+      "votes": [
+        {
+          "ai": "DeepSeek",
+          "signal": "SELL",
+          "confidence": "65%",
+          "reasoning": ""
+        },
+        {
+          "ai": "MultiIndicator",
+          "signal": "SELL",
+          "confidence": "40%",
+          "reasoning": ""
+        }
+      ],
+      "indicators_scanned": [
+        "EMA(5): 153.11830",
+        "EMA(21): 153.25871",
+        "RSI(14): calculated",
+        "Momentum: analyzed",
+        "Volatility: assessed"
+      ],
+      "strategies_checked": [
+        "fabio_aaa_full (EMA crossover + RSI momentum)",
+        "bullish_regime (trend following)",
+        "bearish_regime (counter-trend)",
+        "sideways_regime (range trading)"
+      ]
+    },
+    {
+      "timestamp": "2026-01-27T15:03:08.390563Z",
+      "symbol": "EUR_USD",
+      "direction": "BUY",
+      "entry_price": 1.19538,
+      "decision": "APPROVE",
+      "consensus": "53%",
+      "reasoning": "BUY consensus: 100%",
+      "votes": [
+        {
+          "ai": "DeepSeek",
+          "signal": "BUY",
+          "confidence": "65%",
+          "reasoning": ""
+        },
+        {
+          "ai": "MultiIndicator",
+          "signal": "BUY",
+          "confidence": "40%",
+          "reasoning": ""
+        }
+      ],
+      "indicators_scanned": [
+        "EMA(5): 1.19512",
+        "EMA(21): 1.19441",
+        "RSI(14): calculated",
+        "Momentum: analyzed",
+        "Volatility: assessed"
+      ],
+      "strategies_checked": [
+        "fabio_aaa_full (EMA crossover + RSI momentum)",
+        "bullish_regime (trend following)",
+        "bearish_regime (counter-trend)",
+        "sideways_regime (range trading)"
+      ]
+    },
+    {
+      "timestamp": "2026-01-27T15:05:59.906330Z",
+      "symbol": "USD_JPY",
+      "direction": "SELL",
+      "entry_price": 152.98000000000002,
+      "decision": "APPROVE",
+      "consensus": "53%",
+      "reasoning": "SELL consensus: 100%",
+      "votes": [
+        {
+          "ai": "DeepSeek",
+          "signal": "SELL",
+          "confidence": "65%",
+          "reasoning": ""
+        },
+        {
+          "ai": "MultiIndicator",
+          "signal": "SELL",
+          "confidence": "40%",
+          "reasoning": ""
+        }
+      ],
+      "indicators_scanned": [
+        "EMA(5): 153.05990",
+        "EMA(21): 153.18045",
+        "RSI(14): calculated",
+        "Momentum: analyzed",
+        "Volatility: assessed"
+      ],
+      "strategies_checked": [
+        "fabio_aaa_full (EMA crossover + RSI momentum)",
+        "bullish_regime (trend following)",
+        "bearish_regime (counter-trend)",
+        "sideways_regime (range trading)"
+      ]
+    },
+    {
+      "timestamp": "2026-01-27T15:07:08.681092Z",
+      "symbol": "USD_JPY",
+      "direction": "SELL",
+      "entry_price": 152.9915,
+      "decision": "APPROVE",
+      "consensus": "53%",
+      "reasoning": "SELL consensus: 100%",
+      "votes": [
+        {
+          "ai": "DeepSeek",
+          "signal": "SELL",
+          "confidence": "65%",
+          "reasoning": ""
+        },
+        {
+          "ai": "MultiIndicator",
+          "signal": "SELL",
+          "confidence": "40%",
+          "reasoning": ""
+        }
+      ],
+      "indicators_scanned": [
+        "EMA(5): 153.02770",
+        "EMA(21): 153.14800",
+        "RSI(14): calculated",
+        "Momentum: analyzed",
+        "Volatility: assessed"
+      ],
+      "strategies_checked": [
+        "fabio_aaa_full (EMA crossover + RSI momentum)",
+        "bullish_regime (trend following)",
+        "bearish_regime (counter-trend)",
+        "sideways_regime (range trading)"
+      ]
+    },
+    {
+      "timestamp": "2026-01-27T15:08:52.787839Z",
+      "symbol": "AUD_USD",
+      "direction": "BUY",
+      "entry_price": 0.696585,
+      "decision": "APPROVE",
+      "consensus": "53%",
+      "reasoning": "BUY consensus: 100%",
+      "votes": [
+        {
+          "ai": "DeepSeek",
+          "signal": "BUY",
+          "confidence": "65%",
+          "reasoning": ""
+        },
+        {
+          "ai": "MultiIndicator",
+          "signal": "BUY",
+          "confidence": "40%",
+          "reasoning": ""
+        }
+      ],
+      "indicators_scanned": [
+        "EMA(5): 0.69657",
+        "EMA(21): 0.69639",
+        "RSI(14): calculated",
+        "Momentum: analyzed",
+        "Volatility: assessed"
+      ],
+      "strategies_checked": [
+        "fabio_aaa_full (EMA crossover + RSI momentum)",
+        "bullish_regime (trend following)",
+        "bearish_regime (counter-trend)",
+        "sideways_regime (range trading)"
+      ]
+    },
+    {
+      "timestamp": "2026-01-27T15:09:57.973464Z",
+      "symbol": "GBP_USD",
+      "direction": "BUY",
+      "entry_price": 1.37814,
+      "decision": "APPROVE",
+      "consensus": "53%",
+      "reasoning": "BUY consensus: 100%",
+      "votes": [
+        {
+          "ai": "DeepSeek",
+          "signal": "BUY",
+          "confidence": "65%",
+          "reasoning": ""
+        },
+        {
+          "ai": "MultiIndicator",
+          "signal": "BUY",
+          "confidence": "40%",
+          "reasoning": ""
+        }
+      ],
+      "indicators_scanned": [
+        "EMA(5): 1.37811",
+        "EMA(21): 1.37782",
+        "RSI(14): calculated",
+        "Momentum: analyzed",
+        "Volatility: assessed"
+      ],
+      "strategies_checked": [
+        "fabio_aaa_full (EMA crossover + RSI momentum)",
+        "bullish_regime (trend following)",
+        "bearish_regime (counter-trend)",
+        "sideways_regime (range trading)"
+      ]
+    },
+    {
+      "timestamp": "2026-01-27T15:10:32.734179Z",
+      "symbol": "AUD_USD",
+      "direction": "BUY",
+      "entry_price": 0.6966600000000001,
+      "decision": "APPROVE",
+      "consensus": "53%",
+      "reasoning": "BUY consensus: 100%",
+      "votes": [
+        {
+          "ai": "DeepSeek",
+          "signal": "BUY",
+          "confidence": "65%",
+          "reasoning": ""
+        },
+        {
+          "ai": "MultiIndicator",
+          "signal": "BUY",
+          "confidence": "40%",
+          "reasoning": ""
+        }
+      ],
+      "indicators_scanned": [
+        "EMA(5): 0.69661",
+        "EMA(21): 0.69646",
+        "RSI(14): calculated",
+        "Momentum: analyzed",
+        "Volatility: assessed"
+      ],
+      "strategies_checked": [
+        "fabio_aaa_full (EMA crossover + RSI momentum)",
+        "bullish_regime (trend following)",
+        "bearish_regime (counter-trend)",
+        "sideways_regime (range trading)"
+      ]
+    },
+    {
+      "timestamp": "2026-01-27T15:17:59.589215Z",
+      "symbol": "EUR_USD",
+      "direction": "BUY",
+      "entry_price": 1.196995,
+      "decision": "APPROVE",
+      "consensus": "53%",
+      "reasoning": "BUY consensus: 100%",
+      "votes": [
+        {
+          "ai": "DeepSeek",
+          "signal": "BUY",
+          "confidence": "65%",
+          "reasoning": ""
+        },
+        {
+          "ai": "MultiIndicator",
+          "signal": "BUY",
+          "confidence": "40%",
+          "reasoning": ""
+        }
+      ],
+      "indicators_scanned": [
+        "EMA(5): 1.19678",
+        "EMA(21): 1.19613",
+        "RSI(14): calculated",
+        "Momentum: analyzed",
+        "Volatility: assessed"
+      ],
+      "strategies_checked": [
+        "fabio_aaa_full (EMA crossover + RSI momentum)",
+        "bullish_regime (trend following)",
+        "bearish_regime (counter-trend)",
+        "sideways_regime (range trading)"
+      ]
+    },
+    {
+      "timestamp": "2026-01-27T15:18:42.060406Z",
+      "symbol": "GBP_USD",
+      "direction": "BUY",
+      "entry_price": 1.3787099999999999,
+      "decision": "APPROVE",
+      "consensus": "53%",
+      "reasoning": "BUY consensus: 100%",
+      "votes": [
+        {
+          "ai": "DeepSeek",
+          "signal": "BUY",
+          "confidence": "65%",
+          "reasoning": ""
+        },
+        {
+          "ai": "MultiIndicator",
+          "signal": "BUY",
+          "confidence": "40%",
+          "reasoning": ""
+        }
+      ],
+      "indicators_scanned": [
+        "EMA(5): 1.37873",
+        "EMA(21): 1.37835",
+        "RSI(14): calculated",
+        "Momentum: analyzed",
+        "Volatility: assessed"
+      ],
+      "strategies_checked": [
+        "fabio_aaa_full (EMA crossover + RSI momentum)",
+        "bullish_regime (trend following)",
+        "bearish_regime (counter-trend)",
+        "sideways_regime (range trading)"
+      ]
+    },
+    {
+      "timestamp": "2026-01-27T15:19:20.086956Z",
+      "symbol": "EUR_USD",
+      "direction": "BUY",
+      "entry_price": 1.19678,
+      "decision": "APPROVE",
+      "consensus": "53%",
+      "reasoning": "BUY consensus: 100%",
+      "votes": [
+        {
+          "ai": "DeepSeek",
+          "signal": "BUY",
+          "confidence": "65%",
+          "reasoning": ""
+        },
+        {
+          "ai": "MultiIndicator",
+          "signal": "BUY",
+          "confidence": "40%",
+          "reasoning": ""
+        }
+      ],
+      "indicators_scanned": [
+        "EMA(5): 1.19685",
+        "EMA(21): 1.19621",
+        "RSI(14): calculated",
+        "Momentum: analyzed",
+        "Volatility: assessed"
+      ],
+      "strategies_checked": [
+        "fabio_aaa_full (EMA crossover + RSI momentum)",
+        "bullish_regime (trend following)",
+        "bearish_regime (counter-trend)",
+        "sideways_regime (range trading)"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "last_check": 1769506264.895128,
+  "last_result": "PASS",
+  "last_pair": "AUD_USD",
+  "last_units": 3615,
+  "config": {
+    "MAX_RISK_USD_PER_TRADE": 25.0,
+    "MIN_RR": 1.5,
+    "MAX_UNITS_PER_PAIR": 100000,
+    "MAX_SL_PIPS": 50.0,
+    "EMERGENCY_FLATTEN_USD": 100.0,
+    "ACCOUNT_CCY": "USD"
+  }
+}

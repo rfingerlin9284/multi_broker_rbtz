@@ -1,0 +1,38 @@
+# Automated and manual tasks for acceptance testing
+RESTART_RECOVERY_SMOKE:
+  description: "Restart the rbotzilla service (or simulate start) and verify STARTUP_RECONCILE reports PASS when OANDA is reachable."
+  steps:
+    - "sudo systemctl restart rbotzilla"
+    - "sudo journalctl -u rbotzilla -n 200 | grep STARTUP_RECONCILE"
+    - "Verify logs contain STARTUP_RECONCILE_END with PASS"
+  acceptance:
+    - service_enabled: "sudo systemctl is-enabled rbotzilla"
+    - service_active: "sudo systemctl is-active rbotzilla"
+    - last_startup_result: "journalctl -u rbotzilla -n 200 | grep STARTUP_RECONCILE_END | tail -1"
+    - open_trades_verified: "Use execution client to list open trades and ensure they either have protections or were closed"
+
+HIVE_RECONNECT_CONFIRM:
+  description: "Simulate a watchdog disconnect then recovery and verify HIVE confirmation runs on reconnect when TRADING_MODE=LIVE"
+  steps:
+    - "Set TRADING_MODE=LIVE in .env (use engine_mode.sh with valid PIN to enable in real systems)"
+    - "Temporarily set WATCHDOG_STATE['ok']=False in a running instance (or stop AI endpoints)"
+    - "Restart watchdog or trigger run_watchdog_once to simulate recovery"
+    - "Check 'narration.jsonl' or logs for WATCHDOG_UNFREEZE / HIVE confirmation messages"
+  acceptance:
+    - "Verify 'WATCHDOG_UNFREEZE' event appears in durable events (logs/runs/*.jsonl or audit.log)"
+    - "Verify hive_confirm.json exists and indicates real AI seats responding"
+START_OANDA_PAPER_ENGINE:
+  description: "Start OANDA engine for paper demo practice api token account"
+  exact_label: "Start OANDA engine for paper demo practice api token account"
+  steps:
+    - "Run: tools/start_oanda_paper_engine.sh"
+    - "Verify broker health monitor and OCO reconciler are active"
+    - "Check ops/state/broker_health.json for healthy=true"
+    - "Check ops/state/oco_health.json for no missing OCO"
+  acceptance:
+    - "Broker healthy and engine heartbeat recent"
+    - "OCO reconcile showing ok > 0 and missing = 0"
+    - "Risk governor state file exists"
+
+# Default dashboard selection
+DEFAULT_DASHBOARD_TASK: "Start OANDA engine for paper demo practice api token account"

@@ -1,0 +1,46 @@
+[Unit]
+Description=RBOTzilla OANDA Runner — Supervised Trading Engine for OANDA
+Documentation=file:///home/ing/RICK/MULTI_BROKER_PHOENIX/OPS_OANDA_2WEEK_RUNBOOK.md
+After=network-online.target rbotzilla-orchestrator.service
+Wants=network-online.target
+BindsTo=rbotzilla-orchestrator.service
+
+[Service]
+Type=simple
+User=ing
+Group=ing
+WorkingDirectory=/home/ing/RICK/MULTI_BROKER_PHOENIX
+Environment="PATH=/usr/local/bin:/usr/bin:/bin"
+Environment="PYTHONUNBUFFERED=1"
+
+# Source environment variables
+EnvironmentFile=/home/ing/RICK/MULTI_BROKER_PHOENIX/.env
+EnvironmentFile=-/home/ing/RICK/MULTI_BROKER_PHOENIX/ops/secrets.env
+
+# Start OANDA runner
+ExecStart=/usr/bin/python3 -m multi_broker_phoenix.runners.oanda_runner
+
+# Restart behavior
+Restart=on-failure
+RestartSec=60s
+StartLimitBurst=10
+StartLimitIntervalSec=600s
+
+# Healthcheck: Stop service if heartbeat becomes stale (>120s)
+# This requires a separate watchdog script, commented out for now
+# ExecStartPre=/home/ing/RICK/MULTI_BROKER_PHOENIX/tools/check_heartbeat.sh oanda
+
+# Logging
+StandardOutput=append:/home/ing/RICK/MULTI_BROKER_PHOENIX/logs/oanda/engine.log
+StandardError=append:/home/ing/RICK/MULTI_BROKER_PHOENIX/logs/oanda/engine.log
+SyslogIdentifier=rbotzilla-oanda
+
+# Security hardening (optional)
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/ing/RICK/MULTI_BROKER_PHOENIX/ops /home/ing/RICK/MULTI_BROKER_PHOENIX/logs
+
+[Install]
+WantedBy=multi-user.target

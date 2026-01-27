@@ -1,0 +1,22 @@
+{
+  "generated_at": "20260123T131038Z",
+  "files": {
+    "/home/ing/RICK/MULTI_BROKER_PHOENIX/llm_gate/ollama_gate.py": "984c98a2a74af668e8b664ba8ac16939badeea425268a104955b0cbc0d03f566",
+    "/home/ing/RICK/MULTI_BROKER_PHOENIX/ai_router/router.py": "c9e76de623123f099c60ed04d73c1b49e0af9efdf4f3d3bc2e7451e8a17a1bf4",
+    "/home/ing/RICK/MULTI_BROKER_PHOENIX/ai_router/providers/ollama_provider.py": "f898327456a4a560a0f96a5075c030a8d9cd4f261d946f9d6afb4bf66568a2e9",
+    "/home/ing/RICK/MULTI_BROKER_PHOENIX/ai_router/providers/xai_provider.py": "7f82d84e5c15e367f7d2de972b0f7b2f7c326cc6717d3002483b7ee0e3792871",
+    "/home/ing/RICK/MULTI_BROKER_PHOENIX/ai_router/providers/deepseek_provider.py": "607d2479674da4b4866d148a84d4e53c60bdbb08756a1be60106aff90c13df80",
+    "/home/ing/RICK/MULTI_BROKER_PHOENIX/ops/selftest_ai_brain_gate.sh": "740968b946be65476b832e3e98385ac8cb4413158853c5fc50fbfc809130a8a1",
+    "/home/ing/RICK/MULTI_BROKER_PHOENIX/tools/brain_gate.sh": "497d851fb1a7ee88ebcdcb69634c898619ef5341b84443b635e8611409e3a7b8",
+    "/home/ing/RICK/MULTI_BROKER_PHOENIX/tools/brain_health.sh": "e6e9a6e69b5b4ce1297edd47bf5f13cfd24d4eb5337511d878394221d1c83599",
+    "/home/ing/RICK/MULTI_BROKER_PHOENIX/tools/ai_health.sh": "9b23af30829179b2ef2c9e52ad8ee169f8ed228d75e3feb84008e7ff2dc2c5a5",
+    "/home/ing/RICK/MULTI_BROKER_PHOENIX/tools/ai_repair.sh": "0b1348e9dbe53709a85b74a5e4b48bbd5dbb28895008958760197faf65f47acd",
+    "/home/ing/RICK/MULTI_BROKER_PHOENIX/tools/holdtime_audit.sh": "ff2f5b629546e2712ebec0eb4ab50c55a17efa2fd51a5f0c09c403da491e20cf",
+    "/home/ing/RICK/MULTI_BROKER_PHOENIX/config/toggles.env": "da9a97590e2af8f2b4de4c57d62894bbbf6f16ba24da7e803e252f881a23a8fb",
+    "/home/ing/RICK/MULTI_BROKER_PHOENIX/tools/task_runner.sh": "7c833e8e9e81cddc5fcb0ee2606774773152a0ed118aa80e4d01c9fec7dec0c1",
+    "/home/ing/RICK/MULTI_BROKER_PHOENIX/.vscode/tasks.json": "ea397e6da75945591b5eed797dbdf0f906b1213ac22dff8328d374bc5fe3d1f4",
+    "/home/ing/RICK/MULTI_BROKER_PHOENIX/multi_broker_phoenix/risk/exit_manager.py": "3d59273eee8cc5e85edf352f8f972330d30c7e7f521340349bf5e402e07e1598",
+    "/home/ing/RICK/MULTI_BROKER_PHOENIX/multi_broker_phoenix/risk/protect_loop.py": "34beb41cf2b81008cdab6c3b6db5d70742c59f41124054c9f609c8cf736b41cb",
+    "/home/ing/RICK/MULTI_BROKER_PHOENIX/MULTI_BROKER_PHOENIX/multi_broker_phoenix/monitor/watchdog.py": "30cb3b772cb947843a5d1550e689e4f70012f796849e4ea5c55d0f1b75e021af"
+  }
+}

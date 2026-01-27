@@ -1,0 +1,19 @@
+[Unit]
+Description=RBOTzilla Headless Runner (template - not active)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ing
+WorkingDirectory=/home/ing/RICK/MULTI_BROKER_PHOENIX
+ExecStart=/home/ing/RICK/MULTI_BROKER_PHOENIX/tools/rbot_env_exec.sh
+Restart=always
+RestartSec=3
+StartLimitIntervalSec=0
+KillMode=process
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

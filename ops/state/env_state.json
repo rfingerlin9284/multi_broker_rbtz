@@ -1,0 +1,9 @@
+{
+  "last_loaded_utc": "2026-01-27T13:24:41Z",
+  "toggles_path": "/home/ing/RICK/MULTI_BROKER_PHOENIX/config/toggles.env",
+  "secrets_path_used": "/home/ing/RICK/MULTI_BROKER_PHOENIX/ops/secrets.env",
+  "sha256_toggles": "136e7c302f9c8b2c512103d536574f754c2e4d9dfda7d8cdd0445a2b0805195b",
+  "sha256_secrets": "4a7be6ff2150c3b3210918eb8500e45f9842adb6e636dcf3e3bcebe533755922",
+  "required_keys_presence": {"OANDA_API_TOKEN": true, "OANDA_ACCOUNT_ID": true, "OANDA_API_URL": true, "XAI_API_KEY": true, "DEEPSEEK_API_KEY": true, "OPENAI_API_KEY": false, "OLLAMA_URL": true, "OLLAMA_MODEL": true},
+  "duplicates_detected": []
+}

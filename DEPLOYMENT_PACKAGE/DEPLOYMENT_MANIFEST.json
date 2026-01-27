@@ -1,0 +1,28 @@
+{
+  "build_date": "2026-01-07T09:50:25.455153",
+  "version": "2.0.0-DEPLOYMENT",
+  "protocol": "Fill Verification + Unlimited Daily Limits",
+  "brokers": [
+    "Coinbase",
+    "OANDA",
+    "IBKR"
+  ],
+  "directories": {
+    ".": 9,
+    "data": 4,
+    "tools": 23,
+    "multi_broker_phoenix": 9,
+    "multi_broker_phoenix/data": 1,
+    "multi_broker_phoenix/api": 2,
+    "multi_broker_phoenix/agents": 1,
+    "multi_broker_phoenix/engines": 24,
+    "multi_broker_phoenix/tools": 3,
+    "multi_broker_phoenix/strategies": 15,
+    "multi_broker_phoenix/foundation": 10,
+    "multi_broker_phoenix/brokers": 11,
+    "multi_broker_phoenix/risk": 5,
+    "multi_broker_phoenix/config": 11
+  },
+  "file_count": 128,
+  "total_size_mb": 1.08
+}

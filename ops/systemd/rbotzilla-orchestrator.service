@@ -1,0 +1,41 @@
+[Unit]
+Description=RBOTzilla Orchestrator — Multi-Broker Trading Coordinator
+Documentation=file:///home/ing/RICK/MULTI_BROKER_PHOENIX/SYSTEM_STATUS.md
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ing
+Group=ing
+WorkingDirectory=/home/ing/RICK/MULTI_BROKER_PHOENIX
+Environment="PATH=/usr/local/bin:/usr/bin:/bin"
+Environment="PYTHONUNBUFFERED=1"
+
+# Source environment variables
+EnvironmentFile=/home/ing/RICK/MULTI_BROKER_PHOENIX/.env
+EnvironmentFile=-/home/ing/RICK/MULTI_BROKER_PHOENIX/ops/secrets.env
+
+# Start orchestrator
+ExecStart=/usr/bin/python3 -m multi_broker_phoenix.orchestrator
+
+# Restart behavior
+Restart=on-failure
+RestartSec=30s
+StartLimitBurst=5
+StartLimitIntervalSec=300s
+
+# Logging
+StandardOutput=append:/home/ing/RICK/MULTI_BROKER_PHOENIX/logs/orchestrator/orchestrator.log
+StandardError=append:/home/ing/RICK/MULTI_BROKER_PHOENIX/logs/orchestrator/orchestrator.log
+SyslogIdentifier=rbotzilla-orchestrator
+
+# Security hardening (optional)
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/ing/RICK/MULTI_BROKER_PHOENIX/ops /home/ing/RICK/MULTI_BROKER_PHOENIX/logs
+
+[Install]
+WantedBy=multi-user.target

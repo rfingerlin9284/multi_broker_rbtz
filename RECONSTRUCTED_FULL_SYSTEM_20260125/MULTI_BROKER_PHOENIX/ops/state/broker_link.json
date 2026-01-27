@@ -1,0 +1,8 @@
+{
+  "connected": false,
+  "last_heartbeat": null,
+  "last_error": "verify_failed",
+  "mode": "PAPER",
+  "env": "PAPER",
+  "reconnect_count": 4
+}

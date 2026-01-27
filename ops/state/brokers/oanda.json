@@ -1,0 +1,8 @@
+{
+  "broker": "oanda",
+  "state": "ACTIVE",
+  "fail_count": 1,
+  "last_error": "PLACEMENT_FAILED: GBP_USD reason=INSUFFICIENT_MARGIN",
+  "timestamp": "2026-01-27T15:19:22.278227+00:00",
+  "epoch": 1769527162.278242
+}

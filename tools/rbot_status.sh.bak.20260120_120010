@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+set -euo pipefail
+ROOT="/home/ing/RICK/MULTI_BROKER_PHOENIX"
+TOGGLES="$ROOT/config/toggles.env"
+ENVFILE="$ROOT/.env"
+PIDFILE="$ROOT/logs/engine.pid"
+
+echo "== TOGGLES =="
+if [ -f "$TOGGLES" ]; then
+  grep -E '^(ENABLE_|HEADLESS_MODE=|TRADING_MODE=|PRACTICE_TRADING_ALLOWED=|ALLOW_PRACTICE_ORDERS=|CONFIRM_PRACTICE_ORDER=|REQUIRE_|DISABLE_)' "$TOGGLES" || true
+else
+  echo "Missing: $TOGGLES"
+fi
+
+echo
+echo "== KEYS (presence only, no secrets) =="
+if [ -f "$ENVFILE" ]; then
+  awk -F= '/^(XAI_API_KEY|DEEPSEEK_API_KEY|OPENAI_API_KEY|GROK_API_KEY)=/ {print $1"=" (length($2)>0 ? "[SET]" : "[EMPTY]")}' "$ENVFILE" || true
+else
+  echo "Missing: $ENVFILE"
+fi
+
+echo
+echo "== ENGINE PID =="
+if [ -f "$PIDFILE" ]; then
+  pid="$(cat "$PIDFILE" || true)"
+  if [ -n "${pid:-}" ] && kill -0 "$pid" 2>/dev/null; then
+    echo "RUNNING: pid=$pid"
+  else
+    echo "STALE PIDFILE (not running): $PIDFILE"
+  fi
+else
+  echo "Not running (no pidfile)."
+fi
