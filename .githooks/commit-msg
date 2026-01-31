@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Commit msg hook: when ops/secrets.env is modified in the index, require APPROVAL: <id> in commit message and that id present in HISTORICAL_CHANGE_LOG.md
+set -e
+MSG_FILE="$1"
+ROOT="$(git rev-parse --show-toplevel)"
+STAGED=$(git diff --cached --name-only)
+if echo "$STAGED" | grep -q "ops/secrets.env"; then
+  MSG="$(cat "$MSG_FILE")"
+  if ! echo "$MSG" | grep -q -E "APPROVAL:\s*[0-9a-fA-F\-]{8,}"; then
+    echo "ERROR: ops/secrets.env is staged for commit. You must include an approval id in the commit message like: APPROVAL: <id>" >&2
+    exit 1
+  fi
+  ID=$(echo "$MSG" | grep -Eo "APPROVAL:\s*[0-9a-fA-F\-]{8,}" | head -n1 | sed -E 's/APPROVAL:\s*//')
+  if ! grep -q "$ID" "$ROOT/HISTORICAL_CHANGE_LOG.md"; then
+    echo "ERROR: Approval id $ID not found in HISTORICAL_CHANGE_LOG.md. Create an approval using tools/secure_env_manager.py before committing secret changes." >&2
+    exit 1
+  fi
+  echo "Approval $ID verified for secrets change. Proceeding." >&2
+fi
+exit 0
