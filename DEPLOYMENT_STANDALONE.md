@@ -39,6 +39,12 @@ This document explains how to build, verify, and package a clean, standalone dep
 - All agents (human, CLI, or automated) must read `HISTORICAL_CHANGE_LOG.md` before performing any actions that touch or include sensitive files. Approvals must be explicit, recorded, and discoverable.
 - Any overwrite, backup, or inclusion that affects `ops/secrets.env` requires explicit approval recorded as described above. No silent changes are allowed.
 
+## Git commit safeguards
+
+- A commit-msg hook is provided in `.githooks/commit-msg` that prevents committing changes to `ops/secrets.env` unless the commit message includes an `APPROVAL: <id>` (the approval id must exist in `HISTORICAL_CHANGE_LOG.md`).
+- Install hooks locally with: `bash tools/install_git_hooks.sh` (this copies hooks into `.git/hooks/`).
+- This protects against accidental or unauthorized secret modifications being committed to the repository.
+
 ## Core scripts added
 
 - `tools/build_deployment.py` — builds the deployment, creates manifest and compressed artifact. Has flags to include or exclude `ops/secrets.env`.
