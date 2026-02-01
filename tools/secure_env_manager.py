@@ -128,6 +128,41 @@ def verify_approval(approval_id: str):
         return False
 
 
+def verify_approval_with_pin(approval_id: str, pin: str) -> bool:
+    """Verify approval signature using provided PIN. Returns True if signature matches."""
+    _ensure_dirs()
+    path = APPROVALS_DIR / f"{approval_id}.approval"
+    if not path.exists():
+        print('Approval file not found')
+        return False
+    try:
+        rec = json.loads(path.read_text())
+        payload = rec['payload']
+        sig = rec.get('sig')
+        if not sig:
+            print('Approval record missing signature')
+            return False
+        # Recompute HMAC
+        payload_bytes = json.dumps(payload, sort_keys=True).encode('utf-8')
+        import hmac
+        import hashlib
+        calc = hmac.new(pin.encode('utf-8'), payload_bytes, 'sha256').hexdigest()
+        if hmac.compare_digest(calc, sig):
+            print('✅ Signature verified with provided PIN')
+            # Also verify recorded in history
+            text = HISTORY.read_text()
+            if approval_id not in text:
+                print('Approval id not recorded in HISTORICAL_CHANGE_LOG.md')
+                return False
+            return True
+        else:
+            print('❌ Signature mismatch - invalid PIN')
+            return False
+    except Exception as e:
+        print(f'Invalid approval file or error: {e}')
+        return False
+
+
 def main():
     p = argparse.ArgumentParser()
     sub = p.add_subparsers(dest='cmd')
@@ -138,6 +173,9 @@ def main():
     sub.add_parser('list')
     vp = sub.add_parser('verify')
     vp.add_argument('approval_id')
+    vpp = sub.add_parser('verify-pin')
+    vpp.add_argument('approval_id')
+    vpp.add_argument('--pin', help='PIN (optional; prefer entering interactively)')
     args = p.parse_args()
     if args.cmd == 'set-pin':
         set_pin()
@@ -147,6 +185,14 @@ def main():
         list_approvals()
     elif args.cmd == 'verify':
         ok = verify_approval(args.approval_id)
+        if not ok:
+            exit(2)
+    elif args.cmd == 'verify-pin':
+        pin = getattr(args, 'pin', None)
+        if pin is None:
+            import getpass
+            pin = getpass.getpass('Enter PIN to verify approval: ')
+        ok = verify_approval_with_pin(args.approval_id, pin)
         if not ok:
             exit(2)
     else:

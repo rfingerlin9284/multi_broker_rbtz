@@ -40,6 +40,7 @@ This document explains how to build, verify, and package a clean, standalone dep
 - Any overwrite, backup, or inclusion that affects `ops/secrets.env` requires explicit approval recorded as described above. No silent changes are allowed.
 - A `secrets_snapshot/` folder is used to store read-only copies of canonical secret files for this repository version. Use `tools/make_secrets_snapshot.py` to create a snapshot and `tools/lock_secrets.sh` to set permissions.
 - Agents must follow the `AGENT_POLICIES.md` and use `tools/agent_executor.py` for any approved, actionable commands.
+- To list repository changes (the `get_changed_files` tool), agents must request a PIN and approval id in chat and run `python3 tools/require_get_changed_files.py --approval-id <id>` (the script verifies signature using the PIN). Agents must never call git status/get_changed_files directly.
 
 ## Git commit safeguards
 

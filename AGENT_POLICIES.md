@@ -26,4 +26,9 @@ If an agent requests a secret-modifying action, the agent must:
 2. Wait for the user to confirm approval id and provide it to the agent.
 3. Use `tools/agent_executor.py --approval-id <id> -- <command>` to run the command.
 
+Special rule for listing changed files (`get_changed_files`):
+- Agents must not call `get_changed_files` or equivalent git status functions directly.
+- Agents must request the approval id and request the user's PIN **in chat** (do not accept PINs from env vars or files).
+- After receiving approval id and PIN, agents must execute `python3 tools/require_get_changed_files.py --approval-id <id>` (the script will prompt for PIN if not provided) to obtain the changed-files list.
+
 All approvals are recorded in `HISTORICAL_CHANGE_LOG.md` and are auditable.
