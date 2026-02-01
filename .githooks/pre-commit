@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Pre-commit hook: prevent staging of ops secrets changes unless there is an approval id present in HISTORICAL_CHANGE_LOG.md
+set -e
+ROOT="$(git rev-parse --show-toplevel)"
+STAGED=$(git diff --cached --name-only)
+if echo "$STAGED" | grep -q "^ops/secrets.env$"; then
+  echo "ERROR: ops/secrets.env is staged for commit. This is not allowed unless you have an approval recorded in HISTORICAL_CHANGE_LOG.md" >&2
+  echo "Create an approval with: python3 tools/secure_env_manager.py approve --message \"your message\"" >&2
+  exit 1
+fi
+exit 0

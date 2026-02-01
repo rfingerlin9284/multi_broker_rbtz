@@ -1,0 +1,11 @@
+{
+  "files.exclude": {
+    "**/secrets_snapshot/**": true,
+    "**/*.locked": true
+  },
+  "search.exclude": {
+    "**/secrets_snapshot/**": true,
+    "**/*.locked": true
+  },
+  "security.workspace.trust.untrustedFiles": "open"
+}

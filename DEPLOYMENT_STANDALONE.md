@@ -38,6 +38,8 @@ This document explains how to build, verify, and package a clean, standalone dep
 
 - All agents (human, CLI, or automated) must read `HISTORICAL_CHANGE_LOG.md` before performing any actions that touch or include sensitive files. Approvals must be explicit, recorded, and discoverable.
 - Any overwrite, backup, or inclusion that affects `ops/secrets.env` requires explicit approval recorded as described above. No silent changes are allowed.
+- A `secrets_snapshot/` folder is used to store read-only copies of canonical secret files for this repository version. Use `tools/make_secrets_snapshot.py` to create a snapshot and `tools/lock_secrets.sh` to set permissions.
+- Agents must follow the `AGENT_POLICIES.md` and use `tools/agent_executor.py` for any approved, actionable commands.
 
 ## Git commit safeguards
 
