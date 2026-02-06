@@ -1,0 +1,163 @@
+[
+  {
+    "name": "SPX Gamma Trading",
+    "win_rate_pct": 88,
+    "rr_ratio": "2.5:1",
+    "drawdown_pct": "2-5",
+    "timeframe": "1hr-Daily",
+    "markets": "Options/SPX",
+    "rules": [
+      "Gamma squeeze detection with options chain analysis",
+      "Entry: Delta neutral straddle + gamma scalp on volatility spike",
+      "SL: 1.5x premium",
+      "TP: 2.5x premium or IV crush",
+      "Rule: Only during high VIX (>25)"
+    ],
+    "allow_stop_only": false
+  },
+  {
+    "name": "5-Min Crypto Scalping",
+    "win_rate_pct": 85,
+    "rr_ratio": "2:1",
+    "drawdown_pct": "3-5",
+    "timeframe": "5min",
+    "markets": "Crypto (BTC/ETH)",
+    "rules": [
+      "EMA 9/21 crossover + RSI 14 (oversold/bought)",
+      "Entry: Crossover with volume > MA(20)",
+      "SL: 0.5% ATR",
+      "TP: 1% ATR",
+      "Rule: Only in high liquidity sessions, no news events"
+    ],
+    "tags": ["scalp"],
+    "allow_stop_only": true
+  },
+  {
+    "name": "15 Price Action Strategies",
+    "win_rate_pct": 80,
+    "rr_ratio": "2.5:1",
+    "drawdown_pct": "4-6",
+    "timeframe": "M15-H1",
+    "markets": "Forex/Equities",
+    "rules": [
+      "Pin bars, engulfing, inside bars + Fib 61.8%",
+      "Entry: Pattern at support/resistance + volume confirmation",
+      "SL: Pattern low/high",
+      "TP: Next level (2.5x risk)",
+      "Rule: 3+ confluence (pattern + Fib + MA)"
+    ],
+    "allow_stop_only": false
+  },
+  {
+    "name": "$10 to $11,825 Fractal + SMA",
+    "win_rate_pct": 78,
+    "rr_ratio": "3:1",
+    "drawdown_pct": "5-8",
+    "timeframe": "M5-M15",
+    "markets": "Forex",
+    "rules": [
+      "Fractal break + SMA 50/200 crossover",
+      "Entry: Fractal high/low break with SMA align",
+      "SL: Fractal opposite",
+      "TP: 3x risk or next fractal",
+      "Rule: Compounding: Reinvest 100% profits"
+    ],
+    "allow_stop_only": false
+  },
+  {
+    "name": "One Stock Day Trading",
+    "win_rate_pct": 84,
+    "rr_ratio": "1.5:1",
+    "drawdown_pct": "4-6",
+    "timeframe": "30min-3hrs",
+    "markets": "Small Cap Stocks",
+    "rules": [
+      "Gap + Catalyst (news/earnings) + Volume surge",
+      "Entry: Gap fill + volume > 2x avg",
+      "SL: Gap low/high",
+      "TP: 1.5x risk",
+      "Rule: Max 1 stock/day, position size 20% equity"
+    ],
+    "allow_stop_only": false
+  },
+  {
+    "name": "MA Crossover + ATR",
+    "win_rate_pct": 68,
+    "rr_ratio": "1.8:1",
+    "drawdown_pct": "4-7",
+    "timeframe": "30min-5hrs",
+    "markets": "Forex/Futures",
+    "rules": [
+      "SMA 50/200 crossover + ATR breakout",
+      "Entry: Crossover with price > ATR channel",
+      "SL: 1.2x ATR",
+      "TP: 1.8x ATR",
+      "Rule: Filter with ADX > 25 for trend"
+    ],
+    "allow_stop_only": false
+  },
+  {
+    "name": "EMA + RSI Divergence",
+    "win_rate_pct": 63,
+    "rr_ratio": "1.8:1",
+    "drawdown_pct": "6-7",
+    "timeframe": "1-2hrs",
+    "markets": "Forex/Crypto",
+    "rules": [
+      "EMA 9/21 + RSI 14 divergence",
+      "Entry: Price new low/high, RSI opposite",
+      "SL: Swing low/high",
+      "TP: 1.8x risk",
+      "Rule: Confirm with volume increase"
+    ],
+    "allow_stop_only": false
+  },
+  {
+    "name": "Backside Fade Short",
+    "win_rate_pct": 70,
+    "rr_ratio": "2:1",
+    "drawdown_pct": "6-9",
+    "timeframe": "1-4hrs",
+    "markets": "Equities/Crypto",
+    "rules": [
+      "Post-breakout failure + volume dry up",
+      "Entry: Price retest fail + RSI overbought",
+      "SL: Breakout high",
+      "TP: 2x risk to support",
+      "Rule: Only after false breakout"
+    ],
+    "allow_stop_only": false
+  },
+  {
+    "name": "Breakout + Volume Expansion",
+    "win_rate_pct": 60,
+    "rr_ratio": "2:1",
+    "drawdown_pct": "7-9",
+    "timeframe": "10min-2hrs",
+    "markets": "GBP/JPY, BTC",
+    "rules": [
+      "Consolidation breakout + volume > 1.5x avg",
+      "Entry: Break with MACD cross",
+      "SL: Consolidation low",
+      "TP: 2x range",
+      "Rule: ADX > 20 for trend start"
+    ],
+    "allow_stop_only": false
+  },
+  {
+    "name": "Iron Condor Options",
+    "win_rate_pct": 72,
+    "rr_ratio": "1.5:1",
+    "drawdown_pct": "Low",
+    "timeframe": "3-7 days",
+    "markets": "SPY/QQQ",
+    "rules": [
+      "Neutral range-bound + high IV",
+      "Entry: Sell call/put credit spreads",
+      "SL: Adjust if 1.5x premium",
+      "TP: 50% max profit",
+      "Rule: Theta decay focus, hold <7 days"
+    ],
+    "allow_stop_only": false
+  }
+]
